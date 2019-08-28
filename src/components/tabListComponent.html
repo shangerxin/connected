@@ -1,0 +1,15 @@
+<ngb-accordion #acc="ngbAccordion" activeIds="ngb-panel-0">
+	<ngb-panel *ngFor="let window of windows">
+		<ng-template ngbPanelContent>
+			<button type="button"
+					*ngFor="let tab of window.tabs"
+					[class]="tab.isSelected? 'btn btn-outline-success':'btn btn-outline-light'"
+					(click)="onSelect(tab)">
+					<span>
+						<img class="tabIcon" src={{tab.favIconUrl}}/>
+					</span>
+			</button>
+		</ng-template>
+	</ngb-panel>
+</ngb-accordion>
+
