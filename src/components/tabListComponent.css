@@ -1,5 +1,10 @@
-.tabIcon
+.tab-icon
 {
 	width:16px;
 	height:16px;
+}
+
+.window-panel-header
+{
+	border-block-color: #00AAEE;
 }

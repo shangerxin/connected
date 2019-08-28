@@ -4,5 +4,6 @@ export const GlobalConst = {
 	success:0,
 	failed:-1,
 	pass:0,
-	failure:-1
+	failure:-1,
+	maxWindowTitleLength:20
 };

@@ -1,7 +1,8 @@
 import * as _ from "lodash";
 import { OnInit, Component } from "@angular/core";
 
-import {BrowserService} from '../services/browserService';
+import {BrowserService} from "../services/browserService";
+import {GlobalConst} from "../environments/globalConstTypes";
 
 
 @Component({
@@ -27,9 +28,6 @@ export class TabListComponent implements OnInit{
 	}
 
 	public get windows(){
-		// return _.filter(this._allWindows, window=>{
-		// 	return window.tabs && window.tabs.length > 0;
-		// });
 		return this._allWindows;
 	}
 
@@ -59,5 +57,24 @@ export class TabListComponent implements OnInit{
 
 	async getWindows(){
 		this._allWindows = await this.browserService.getWindows();
+		this._allWindows = _.map(this._allWindows, window =>{
+			let title = window.tabs[0].title? window.tabs[0].title:'';
+			window.title = title.length > GlobalConst.maxWindowTitleLength? title.substring(0, GlobalConst.maxWindowTitleLength) + '...':title;
+			return window;
+		});
+	}
+
+	async onSelectWindow(window){
+		window.isSelected = window.isSelected? false:true;
+		if(window.isSelected){
+			this.selectedWindows.push(window);
+			this.browserService.targetWindows = this.selectedWindows;
+		}
+	}
+
+	async onClickCloseWindow(window){
+		let targetWindows = [window];
+		_.pull(this.selectedWindows, targetWindows);
+		this.browserService.closeWindows(targetWindows);
 	}
 };

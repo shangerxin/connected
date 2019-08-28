@@ -1,5 +1,24 @@
-<ngb-accordion #acc="ngbAccordion" activeIds="ngb-panel-0">
-	<ngb-panel *ngFor="let window of windows" (dblclick)="onDoubleClickWindow(window)">
+<ngb-accordion #acc="ngbAccordion" activeIds="ngb-panel-0" type="light">
+	<ngb-panel *ngFor="let window of windows">
+		<ng-template ngbPanelHeader>
+			<div [class]="window.isSelected? 'window-panel-header row align-items-end justify-content-between':'row align-items-end justify-content-between'">
+				<button ngbPanelToggle
+						 class="btn btn-link col"
+						 (dblclick)="onDoubleClickWindow(window)"
+						 (click)="onSelectWindow(window)">{{window.title}}</button>
+				<span class="col">
+					<span class="row align-items-center justify-content-end">
+						<label>{{window.tabs.length}}</label>
+						<button class="close btn-outline-secondary"
+								(click)="onClickCloseWindow(window)"
+								type="button"
+								style="z-index: 3;margin:-10px 0 0 3px">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</span>
+				</span>
+			</div>
+		</ng-template>
 		<ng-template ngbPanelContent>
 			<button type="button"
 					*ngFor="let tab of window.tabs"
@@ -7,10 +26,9 @@
 					(click)="onToggleSelected(tab)"
 					(dblclick)="onDoubleClickTab(tab)">
 					<span>
-						<img class="tabIcon" src={{tab.favIconUrl}}/>
+						<img class="tab-icon" src={{tab.favIconUrl}}/>
 					</span>
-			</button>
+					</button>
 		</ng-template>
 	</ngb-panel>
 </ngb-accordion>
-

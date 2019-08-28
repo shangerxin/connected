@@ -13,7 +13,6 @@ export class ToolbarComponent implements OnInit{
 
 	}
 	ngOnInit(): void {
-
 	}
 
 	public onClickPinTabs(){
@@ -21,23 +20,23 @@ export class ToolbarComponent implements OnInit{
 	}
 
 	public onClickCloseTabs(){
-
+		this.browserService.closeTabs();
 	}
 
 	public onClickUndoCloseTabs(){
-
+		this.browserService.undoCloseTabs();
 	}
 
 	public onClickCloseWindows(){
-
+		this.browserService.closeWindows();
 	}
 
 	public onClickRefreshTabs(){
-
+		this.browserService.reloadTabs();
 	}
 
 	public onClickRefreshAllTab(){
-
+		this.browserService.reloadAllTabs();
 	}
 
 	public onClickOptions(){
@@ -45,6 +44,6 @@ export class ToolbarComponent implements OnInit{
 	}
 
 	public onClickMutedAll(){
-
+		this.browserService.mutedAllTabs();
 	}
 }

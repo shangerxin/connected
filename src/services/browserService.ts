@@ -1,17 +1,22 @@
 import * as _ from "lodash";
 
 import { Injectable } from "@angular/core";
+import "../extends/extendPromise";
 
 @Injectable({
     providedIn: "root"
 })
 export class BrowserService {
-    constructor() {}
+    constructor() {
+        this.getCurrentTab();
+        this.getCurrentWindow();
+    }
 
     currentTab: any;
     currentWindow: any;
     targetTabs: Array<any>;
     targetWindows: Array<any>;
+    private _previousClosedTabsInfo: any;
 
     allTabs: Array<any>;
     allWindows: Array<any>;
@@ -45,12 +50,21 @@ export class BrowserService {
 
     async pinTabs(tabs = this.targetTabs) {
         if (tabs) {
+            let isAllPinned = _.reduce(
+                tabs,
+                (r, tab) => tab.pinned === true && r === true,
+                true
+            );
             return Promise.all(
                 _.map(tabs, tab => {
                     return new Promise(res => {
-                        chrome.tabs.update(tab.id, { pinned: true }, () => {
-                            res();
-                        });
+                        chrome.tabs.update(
+                            tab.id,
+                            { pinned: !isAllPinned },
+                            () => {
+                                res();
+                            }
+                        );
                     });
                 })
             );
@@ -59,6 +73,9 @@ export class BrowserService {
 
     async closeTabs(tabs = this.targetTabs) {
         if (tabs) {
+            this._previousClosedTabsInfo = _.map(tabs, tab => {
+                return { url: tab.id, windowId: tab.windowId };
+            });
             return Promise.all(
                 _.map(tabs, tab => {
                     return new Promise(res => {
@@ -123,7 +140,7 @@ export class BrowserService {
             return new Promise(res => {
                 chrome.tabs.update(
                     tab.id,
-                    { highlighted: true, active: true },
+                    { active: true },
                     () => {
                         res();
                     }
@@ -161,14 +178,28 @@ export class BrowserService {
         });
     }
 
-    async createWindow() {}
+    async createWindow() {
+        return new Promise(res => {
+            chrome.windows.create(window => {
+                res();
+            });
+        });
+    }
 
-    async closeWindows() {
-        if (this.targetWindows) {
+    async closeWindows(windows = this.targetWindows) {
+        if (windows) {
+            this._previousClosedTabsInfo = [];
             return Promise.all(
-                _.map(this.targetWindows, window => {
+                _.map(windows, window => {
                     return new Promise(res => {
+                        _.forEach(window.tabs, tab => {
+                            this._previousClosedTabsInfo.push({
+                                url: tab.url,
+                                windowId: tab.windowId
+                            });
+                        });
                         chrome.windows.remove(window.id, () => {
+                            this.targetWindows = [];
                             res();
                         });
                     });
@@ -177,7 +208,7 @@ export class BrowserService {
         }
     }
 
-    forcusWindow(window) {
+    async forcusWindow(window = null) {
         window =
             window ||
             (this.targetWindows &&
@@ -203,4 +234,47 @@ export class BrowserService {
             return this.reloadTabs(tabs);
         }
     }
+
+    async undoCloseTabs() {
+        if (this._previousClosedTabsInfo) {
+            let newWindow = null;
+            return Promise.sequenceAll(
+                _.map(this._previousClosedTabsInfo, async info => {
+                    await this.getWindows();
+                    let windowIds = new Set(
+                        _.map(this.allWindows, window => window.id)
+                    );
+                    if (windowIds.has(info.windowId)) {
+                        return new Promise(res => {
+                            chrome.tabs.create({ url: info.url }, () => {
+                                res();
+                            });
+                        });
+                    } else {
+                        return new Promise(res => {
+                            if (!newWindow) {
+                                chrome.windows.create(window => {
+                                    newWindow = window;
+                                    res();
+                                });
+                            } else {
+                                res();
+                            }
+                        }).then(() => {
+                            return new Promise(res => {
+                                chrome.tabs.create(
+                                    { url: info.url, windowId: newWindow.id },
+                                    () => {
+                                        res();
+                                    }
+                                );
+                            });
+                        });
+                    }
+                })
+            );
+        }
+    }
+
+    protected startMonitorBrowser() {}
 }
