@@ -15,8 +15,21 @@ export class BrowserService {
     currentTab: any;
     currentWindow: any;
     targetTabs: Array<any>;
-    targetWindows: Array<any>;
-    private _previousClosedTabsInfo: any;
+	targetWindows: Array<any>;
+
+	private _previousClosedTabsInfo:any;
+	protected get previousClosedTabsInfo(){
+		if(this._previousClosedTabsInfo){
+			
+		}
+		return this._previousClosedTabsInfo;
+	}
+
+	protected set previousClosedTabsInfo(v){
+
+	}
+
+
 
     allTabs: Array<any>;
     allWindows: Array<any>;
@@ -73,7 +86,7 @@ export class BrowserService {
 
     async closeTabs(tabs = this.targetTabs) {
         if (tabs) {
-            this._previousClosedTabsInfo = _.map(tabs, tab => {
+            this.previousClosedTabsInfo = _.map(tabs, tab => {
                 return { url: tab.id, windowId: tab.windowId };
             });
             return Promise.all(
@@ -188,12 +201,12 @@ export class BrowserService {
 
     async closeWindows(windows = this.targetWindows) {
         if (windows) {
-            this._previousClosedTabsInfo = [];
+            this.previousClosedTabsInfo = [];
             return Promise.all(
                 _.map(windows, window => {
                     return new Promise(res => {
                         _.forEach(window.tabs, tab => {
-                            this._previousClosedTabsInfo.push({
+                            this.previousClosedTabsInfo.push({
                                 url: tab.url,
                                 windowId: tab.windowId
                             });
@@ -236,10 +249,10 @@ export class BrowserService {
     }
 
     async undoCloseTabs() {
-        if (this._previousClosedTabsInfo) {
+        if (this.previousClosedTabsInfo) {
             let newWindow = null;
             return Promise.sequenceAll(
-                _.map(this._previousClosedTabsInfo, async info => {
+                _.map(this.previousClosedTabsInfo, async info => {
                     await this.getWindows();
                     let windowIds = new Set(
                         _.map(this.allWindows, window => window.id)
