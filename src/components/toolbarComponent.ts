@@ -17,7 +17,7 @@ export class ToolbarComponent implements OnInit{
 	}
 
 	public onClickPinTabs(){
-
+		this.browserService.pinTabs();
 	}
 
 	public onClickCloseTabs(){

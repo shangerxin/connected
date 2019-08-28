@@ -43,8 +43,7 @@ export class BrowserService {
 
     async createTab() {}
 
-    async pinTabs(tabs) {
-        tabs = tabs || this.targetTabs;
+    async pinTabs(tabs = this.targetTabs) {
         if (tabs) {
             return Promise.all(
                 _.map(tabs, tab => {
@@ -58,23 +57,21 @@ export class BrowserService {
         }
     }
 
-    async closeTabs(tabs) {
-		tabs = tabs || this.targetTabs;
+    async closeTabs(tabs = this.targetTabs) {
         if (tabs) {
             return Promise.all(
                 _.map(tabs, tab => {
                     return new Promise(res => {
-						chrome.tabs.remove(tab.id, () => {
-							res();
-						});
+                        chrome.tabs.remove(tab.id, () => {
+                            res();
+                        });
                     });
                 })
             );
         }
     }
 
-    async reloadTabs(tabs) {
-        tabs = tabs || this.targetTabs;
+    async reloadTabs(tabs = this.targetTabs) {
         if (tabs) {
             return Promise.all(
                 _.map(tabs, tab => {
@@ -114,17 +111,26 @@ export class BrowserService {
                 });
             });
         });
-	}
+    }
 
-	async focusTab(tab){
-		tab = tab ||
-			 (this.targetTabs && this.targetTabs.length > 0 && this.targetTabs[0]);
-		if(tab){
-
-		}
-
-
-	}
+    async focusTab(tab = null) {
+        tab =
+            tab ||
+            (this.targetTabs &&
+                this.targetTabs.length > 0 &&
+                this.targetTabs[0]);
+        if (tab) {
+            return new Promise(res => {
+                chrome.tabs.update(
+                    tab.id,
+                    { highlighted: true, active: true },
+                    () => {
+                        res();
+                    }
+                );
+            });
+        }
+    }
 
     async takeSnapshortForTabs() {}
 
@@ -133,16 +139,16 @@ export class BrowserService {
     //Window realtive
     async getWindows() {
         return new Promise((res, rej) => {
-            chrome.windows.getAll({ populate: true, windowTypes: [
-				"normal",
-				"popup",
-				"panel",
-				"app",
-				"devtools"
-			] }, windows => {
-                this.allWindows = windows;
-                res(windows);
-            });
+            chrome.windows.getAll(
+                {
+                    populate: true,
+                    windowTypes: ["normal", "popup", "panel", "app", "devtools"]
+                },
+                windows => {
+                    this.allWindows = windows;
+                    res(windows);
+                }
+            );
         });
     }
 
@@ -168,6 +174,21 @@ export class BrowserService {
                     });
                 })
             );
+        }
+    }
+
+    forcusWindow(window) {
+        window =
+            window ||
+            (this.targetWindows &&
+                this.targetWindows.length > 0 &&
+                this.targetWindows[0]);
+        if (window) {
+            return new Promise(res => {
+                chrome.windows.update(window.id, { focused: true }, () => {
+                    res();
+                });
+            });
         }
     }
 

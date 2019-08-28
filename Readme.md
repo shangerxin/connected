@@ -1,3 +1,9 @@
+# Introduction
+This project Connected is main to accelerate the personal daily productivity.
+It included personal workspace management and tab management etc.
+
+# Features
+
 # Setup
 - prequirement
 nodejs

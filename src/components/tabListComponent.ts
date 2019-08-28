@@ -11,6 +11,7 @@ import {BrowserService} from '../services/browserService';
 })
 export class TabListComponent implements OnInit{
 	public selectedTabs = [];
+	public selectedWindows = [];
 	private _allTabs = null;
 	private _allWindows = null;
 	constructor(private browserService:BrowserService){
@@ -26,17 +27,30 @@ export class TabListComponent implements OnInit{
 	}
 
 	public get windows(){
-		return _.filter(this._allWindows, window=>{
-			return window.tabs && window.tabs.length > 0;
-		});
+		// return _.filter(this._allWindows, window=>{
+		// 	return window.tabs && window.tabs.length > 0;
+		// });
+		return this._allWindows;
 	}
 
-	public onSelect(tab){
+	public onToggleSelected(tab){
 		tab.isSelected = tab.isSelected? false:true;
 		if(tab.isSelected){
 			this.selectedTabs.push(tab);
 			this.browserService.targetTabs = this.selectedTabs;
 		}
+	}
+
+	public onDoubleClickTab(tab){
+		this.selectedTabs = [tab];
+		this.browserService.targetTabs = this.selectedTabs;
+		this.browserService.focusTab(tab);
+	}
+
+	public onDoubleClickWindow(window){
+		this.selectedWindows = [window];
+		this.browserService.targetWindows = this.selectedWindows;
+		this.browserService.forcusWindow(window);
 	}
 
 	async getTabs(){
