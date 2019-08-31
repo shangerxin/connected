@@ -1,9 +1,21 @@
 interface PromiseConstructor{
-	sequenceAll(promises:Array<any>):Promise<any>;
+	sequenceHandleAll(dataArray:Array<any>, calculateFunc:Function, init?:any):Promise<any>;
 }
 
-Promise.sequenceAll = function(promises):Promise<any>{
-	return	_.reduce(promises, (r, p)=>{
-		return r.then(()=>p);
-	}), Promise.resolve();
+Promise.sequenceHandleAll = async function(dataArray, asyncHandler, init=null):Promise<any>{
+	return new Promise((res, rej)=>{
+		dataArray.reduce((pre, cur)=>{
+			return pre.then(()=>{
+				return new Promise((res0)=>{
+					asyncHandler(cur, (v)=>{
+						res0(v);
+					});
+				});
+			})
+		}, Promise.resolve(init)).then(()=>{
+			res();
+		}).catch((e)=>{
+			rej(e);
+		});
+	});
 };

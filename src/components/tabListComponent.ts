@@ -52,7 +52,7 @@ export class TabListComponent implements OnInit{
 	}
 
 	async getTabs(){
-		this._allTabs = await this.browserService.getTabs();
+		this._allTabs = await this.browserService.getAllTabs();
 	}
 
 	async getWindows(){

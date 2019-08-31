@@ -2,40 +2,46 @@ import * as _ from "lodash";
 
 import { Injectable } from "@angular/core";
 import "../extends/extendPromise";
+import { DBBrowserKeys } from "../environments/globalConstTypes";
+import { PersistentService } from "../services/persistentService";
 
 @Injectable({
     providedIn: "root"
 })
 export class BrowserService {
-    constructor() {
+    constructor(private persistentService: PersistentService) {
         this.getCurrentTab();
         this.getCurrentWindow();
+        persistentService
+            .get(DBBrowserKeys.previousClosedTabsInfo)
+            .then(v => (this._previousClosedTabsInfo = v));
     }
 
     currentTab: any;
     currentWindow: any;
     targetTabs: Array<any>;
-	targetWindows: Array<any>;
+    targetWindows: Array<any>;
 
-	private _previousClosedTabsInfo:any;
-	protected get previousClosedTabsInfo(){
-		if(this._previousClosedTabsInfo){
-			
-		}
-		return this._previousClosedTabsInfo;
-	}
+    private _previousClosedTabsInfo: any;
+    protected get previousClosedTabsInfo() {
+        return this._previousClosedTabsInfo;
+    }
 
-	protected set previousClosedTabsInfo(v){
-
-	}
-
-
+    protected set previousClosedTabsInfo(v) {
+        if (this._previousClosedTabsInfo !== v) {
+            this._previousClosedTabsInfo = v;
+            this.persistentService.save(
+                DBBrowserKeys.previousClosedTabsInfo,
+                this._previousClosedTabsInfo
+            );
+        }
+    }
 
     allTabs: Array<any>;
     allWindows: Array<any>;
 
     //Tab relative
-    async getTabs() {
+    async getAllTabs() {
         return new Promise((res, rej) => {
             let allTabs = [];
             chrome.windows.getAll({ populate: true }, windows => {
@@ -61,7 +67,7 @@ export class BrowserService {
 
     async createTab() {}
 
-    async pinTabs(tabs = this.targetTabs) {
+    async togglePinTabs(tabs = this.targetTabs) {
         if (tabs) {
             let isAllPinned = _.reduce(
                 tabs,
@@ -87,7 +93,7 @@ export class BrowserService {
     async closeTabs(tabs = this.targetTabs) {
         if (tabs) {
             this.previousClosedTabsInfo = _.map(tabs, tab => {
-                return { url: tab.id, windowId: tab.windowId };
+                return { url: tab.url, windowId: tab.windowId };
             });
             return Promise.all(
                 _.map(tabs, tab => {
@@ -120,7 +126,7 @@ export class BrowserService {
     }
 
     async reloadAllTabs() {
-        return this.getTabs().then(tabs => {
+        return this.getAllTabs().then(tabs => {
             return new Promise(res => {
                 _.forEach(<any>tabs, tab => {
                     chrome.tabs.reload(tab.id, { bypassCache: true }, () => {
@@ -131,11 +137,16 @@ export class BrowserService {
         });
     }
 
-    async mutedAllTabs() {
-        return this.getTabs().then(tabs => {
+    async toggleMutedAllTabs() {
+        return this.getAllTabs().then(tabs => {
             return new Promise(res => {
+                let isAllMuted = _.reduce(
+                    <any>tabs,
+                    (r, tab) => tab.mutedInfo.muted === true && r === true,
+                    true
+                );
                 _.forEach(<any>tabs, tab => {
-                    chrome.tabs.update(tab.id, { muted: true }, () => {
+                    chrome.tabs.update(tab.id, { muted: !isAllMuted }, () => {
                         res();
                     });
                 });
@@ -151,13 +162,9 @@ export class BrowserService {
                 this.targetTabs[0]);
         if (tab) {
             return new Promise(res => {
-                chrome.tabs.update(
-                    tab.id,
-                    { active: true },
-                    () => {
-                        res();
-                    }
-                );
+                chrome.tabs.update(tab.id, { active: true }, () => {
+                    res();
+                });
             });
         }
     }
@@ -201,12 +208,12 @@ export class BrowserService {
 
     async closeWindows(windows = this.targetWindows) {
         if (windows) {
-            this.previousClosedTabsInfo = [];
+            let closedTabs = [];
             return Promise.all(
                 _.map(windows, window => {
                     return new Promise(res => {
                         _.forEach(window.tabs, tab => {
-                            this.previousClosedTabsInfo.push({
+                            closedTabs.push({
                                 url: tab.url,
                                 windowId: tab.windowId
                             });
@@ -217,7 +224,9 @@ export class BrowserService {
                         });
                     });
                 })
-            );
+            ).then(() => {
+                this.previousClosedTabsInfo = closedTabs;
+            });
         }
     }
 
@@ -250,41 +259,46 @@ export class BrowserService {
 
     async undoCloseTabs() {
         if (this.previousClosedTabsInfo) {
-            let newWindow = null;
-            return Promise.sequenceAll(
-                _.map(this.previousClosedTabsInfo, async info => {
+            let windowInfo: any = {};
+            return Promise.sequenceHandleAll(
+                this.previousClosedTabsInfo,
+                async (info, callback) => {
                     await this.getWindows();
                     let windowIds = new Set(
                         _.map(this.allWindows, window => window.id)
                     );
                     if (windowIds.has(info.windowId)) {
-                        return new Promise(res => {
-                            chrome.tabs.create({ url: info.url }, () => {
-                                res();
-                            });
-                        });
-                    } else {
-                        return new Promise(res => {
-                            if (!newWindow) {
-                                chrome.windows.create(window => {
-                                    newWindow = window;
-                                    res();
-                                });
-                            } else {
-                                res();
+                        chrome.tabs.create(
+                            { url: info.url, windowId: info.windowId },
+                            () => {
+                                callback();
                             }
-                        }).then(() => {
-                            return new Promise(res => {
-                                chrome.tabs.create(
-                                    { url: info.url, windowId: newWindow.id },
+                        );
+                    } else {
+                        if (!windowInfo.window) {
+                            chrome.windows.create(window => {
+                                windowInfo.window = window;
+                                chrome.tabs.update(
+                                    window.tabs[0].id,
+                                    { url: info.url },
                                     () => {
-                                        res();
+                                        callback();
                                     }
                                 );
                             });
-                        });
+                        } else {
+                            chrome.tabs.create(
+                                {
+                                    url: info.url,
+                                    windowId: windowInfo.window.id
+                                },
+                                () => {
+                                    callback();
+                                }
+                            );
+                        }
                     }
-                })
+                }
             );
         }
     }

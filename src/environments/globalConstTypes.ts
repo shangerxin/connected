@@ -7,3 +7,7 @@ export const GlobalConst = {
 	failure:-1,
 	maxWindowTitleLength:20
 };
+
+export const DBBrowserKeys = {
+	previousClosedTabsInfo:'previousClosedTabsInfo'
+};

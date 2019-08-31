@@ -20,7 +20,7 @@ export class HistoryService {
 				this.crumbs.push(tab);
 			}
         });
-        browserSerivce.getTabs().then(tabs => {
+        browserSerivce.getAllTabs().then(tabs => {
             this._tabs = tabs;
         });
     }
@@ -28,21 +28,21 @@ export class HistoryService {
     //TODO: move into BrowserService
     protected initListeners() {
         chrome.tabs.onActivated.addListener(activeInfo => {
-            let crumbIndex = _.findIndex(
-                this.crumbs,
-                crumb => (<any>crumb).id === activeInfo.tabId
-			);
+            // let crumbIndex = _.findIndex(
+            //     this.crumbs,
+            //     crumb => (<any>crumb).id === activeInfo.tabId
+			// );
 
-			if(crumbIndex === -1){
-				if(this.crumbs.length >= this._crumbMaxLength){
-					this.crumbs.pop();
-				}
-				let tabIndex = _.findIndex(this._tabs, tab=> activeInfo.tabId === (<any>tab).id)
-				this.crumbs.unshift(this._tabs[tabIndex]);
-			}
-			else{
-				this.crumbs.swapToHead(crumbIndex);
-			}
+			// if(crumbIndex === -1){
+			// 	if(this.crumbs.length >= this._crumbMaxLength){
+			// 		this.crumbs.pop();
+			// 	}
+			// 	let tabIndex = _.findIndex(this._tabs, tab=> activeInfo.tabId === (<any>tab).id)
+			// 	this.crumbs.unshift(this._tabs[tabIndex]);
+			// }
+			// else{
+			// 	this.crumbs.swapToHead(crumbIndex);
+			// }
         });
     }
 }

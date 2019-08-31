@@ -16,7 +16,7 @@ export class ToolbarComponent implements OnInit{
 	}
 
 	public onClickPinTabs(){
-		this.browserService.pinTabs();
+		this.browserService.togglePinTabs();
 	}
 
 	public onClickCloseTabs(){
@@ -44,6 +44,6 @@ export class ToolbarComponent implements OnInit{
 	}
 
 	public onClickMutedAll(){
-		this.browserService.mutedAllTabs();
+		this.browserService.toggleMutedAllTabs();
 	}
 }

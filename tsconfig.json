@@ -11,11 +11,10 @@
 		"removeComments": true,
         "module": "commonjs",
 		"target": "es6",
-		"jsx": "react",
 		"typeRoots": [
 			"node_modules/@types",
 			"node_modules/@*"
-		],
+		]
     },
     "include": [
         "./src/**/*"
@@ -23,5 +22,5 @@
 	"exclude": [
         "node_modules",
         "**/*.spec.ts"
-	]
+	],
 }

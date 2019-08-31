@@ -25,7 +25,7 @@ export class FilterComponent implements OnInit{
 	}
 
 	async updateContext(){
-		this.context = await this.browserService.getTabs();
+		this.context = await this.browserService.getAllTabs();
 	}
 
 	public onKey(value:string){
