@@ -1,4 +1,4 @@
-<div class="input-group">
+<div class="input-group" style="margin: 5px">
 	<input type="text"
 			#filterElem
 			id="filterInput"
@@ -6,7 +6,7 @@
 			[(ngModel)]="filter"
 			placeholder="Search url/title"
 			(keyup)=onKey(filterElem.value)/>
-	<span class="input-group-append" style="margin-left: -20px">
+	<span class="input-group-append" style="margin-left: -20px; margin-right:20px">
 		<button class="close btn-outline-secondary" (click)="onClickResetFilter()" type="button" style="z-index: 3">
 			<span aria-hidden="true">&times;</span>
 		</button>

@@ -27,10 +27,6 @@ export class ToolbarComponent implements OnInit{
 		this.browserService.undoCloseTabs();
 	}
 
-	public onClickCloseWindows(){
-		this.browserService.closeWindows();
-	}
-
 	public onClickRefreshTabs(){
 		this.browserService.reloadTabs();
 	}
@@ -45,5 +41,9 @@ export class ToolbarComponent implements OnInit{
 
 	public onClickMutedAll(){
 		this.browserService.toggleMutedAllTabs();
+	}
+
+	public onClickOpenInNewWindow(){
+		this.browserService.openInNewWindow();
 	}
 }

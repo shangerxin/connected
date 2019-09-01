@@ -22,6 +22,10 @@ export class TabListComponent implements OnInit{
 		this.getWindows();
 	}
 
+	ngDoCheck(){
+
+	}
+
 
 	public get tabs(){
 		return this._allTabs;
@@ -60,6 +64,12 @@ export class TabListComponent implements OnInit{
 		this._allWindows = _.map(this._allWindows, window =>{
 			let title = window.tabs[0].title? window.tabs[0].title:'';
 			window.title = title.length > GlobalConst.maxWindowTitleLength? title.substring(0, GlobalConst.maxWindowTitleLength) + '...':title;
+			_.forEach(window.tabs, tab=>{
+				tab.isFilterOut = false;
+				tab.iconUrl = tab.url && tab.url.startsWith("chrome:")?
+								 "assets/images/chrome16.png":
+								 tab.favIconUrl;
+			});
 			return window;
 		});
 	}

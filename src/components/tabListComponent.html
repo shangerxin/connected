@@ -20,15 +20,19 @@
 			</div>
 		</ng-template>
 		<ng-template ngbPanelContent>
-			<button type="button"
-					*ngFor="let tab of window.tabs"
-					[class]="tab.isSelected? 'btn btn-outline-success':'btn btn-outline-light'"
-					(click)="onToggleSelected(tab)"
-					(dblclick)="onDoubleClickTab(tab)">
-					<span>
-						<img class="tab-icon" src={{tab.favIconUrl}}/>
-					</span>
-					</button>
+			<span *ngFor="let tab of window.tabs">
+				<button type="button"
+						*ngIf="!tab.isFilterOut"
+						[class]="tab.isSelected? 'btn btn-outline-success':'btn btn-outline-light'"
+						(click)="onToggleSelected(tab)"
+						(dblclick)="onDoubleClickTab(tab)">
+						<span class="flex-row align-content-center">
+							<img class="tab-icon flex-col" src={{tab.iconUrl}}/>
+							<img *ngIf="tab.pinned" src="assets/images/pin16.png"
+								class="tab-pin-icon flex-col"/>
+						</span>
+				</button>
+			</span>
 		</ng-template>
 	</ngb-panel>
 </ngb-accordion>
