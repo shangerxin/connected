@@ -1,9 +1,10 @@
 interface Array<T>{
 	swapToHead(index:number):Array<T>;
+	updateWith(compare:Function, update:Function);
 }
 
 Array.prototype.swapToHead = function(index):Array<any>{
-	if(this.length >= index){
+	if(this.length >= index || index === 0){
 		return this;
 	}
 
@@ -11,4 +12,8 @@ Array.prototype.swapToHead = function(index):Array<any>{
 	this[0] = this[index];
 	this[index] = t;
 	return this;
+};
+
+Array.prototype.updateWith = function(compare, update){
+
 };

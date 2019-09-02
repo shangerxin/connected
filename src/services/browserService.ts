@@ -1,43 +1,58 @@
 import * as _ from "lodash";
 
-import { Injectable } from "@angular/core";
+import { Injectable, OnDestroy } from "@angular/core";
 import "../extends/extendPromise";
-import { DBBrowserKeys, GlobalConst } from "../environments/globalConstTypes";
+import {
+    DBBrowserKeys,
+    GlobalConst,
+    Subjects
+} from "../environments/globalConstTypes";
 import { PersistentService } from "../services/persistentService";
-import { Subject } from "rxjs";
-
+import { Subject, Observable } from "rxjs";
+import { stringLiteral } from "@babel/types";
 
 @Injectable({
     providedIn: "root"
 })
-export class BrowserService {
+export class BrowserService implements OnDestroy {
+    ngOnDestroy(): void {
+        this.clearAll();
+        this.stopMonitorBrowser();
+    }
     constructor(private persistentService: PersistentService) {
         this.getCurrentTab();
-		this.getCurrentWindow();
-		this.getWindows();
-		this.getAllTabs();
+        this.getCurrentWindow();
+        this.getWindows().then(() => this.getAllTabs());
         persistentService
             .get(DBBrowserKeys.previousClosedTabsInfo)
-			.then(v => (this._previousClosedTabsInfo = v));
+            .then(v => (this._previousClosedTabsInfo = v));
 
-		this.tabChangedSubject = new Subject<any>();
-		this.windowChangedSubject = new Subject<any>();
+        this.tabChangedSubject = new Subject<any>();
+        this.tabChangedObservable = this.tabChangedSubject.asObservable();
+        this.windowChangedSubject = new Subject<any>();
+        this.windowChangedObservable = this.windowChangedSubject.asObservable();
+        this._browserListeners = new Map<string, Function>();
+        this.startMonitorBrowser();
     }
 
-	allTabs: Array<any>;
+    protected allTabs: Array<any>;
     allWindows: Array<any>;
     currentTab: any;
     currentWindow: any;
     targetTabs: Array<any>;
-	targetWindows: Array<any>;
+    targetWindows: Array<any>;
 
-	tabChangedSubject:Subject<any>;
-	windowChangedSubject:Subject<any>;
+    tabChangedSubject: Subject<any>;
+    tabChangedObservable: Observable<any>;
+    windowChangedSubject: Subject<any>;
+    windowChangedObservable: Observable<any>;
+
+    private _browserListeners: Map<string, Function>;
 
     private _previousClosedTabsInfo: any;
     protected get previousClosedTabsInfo() {
         return this._previousClosedTabsInfo;
-	}
+    }
 
     protected set previousClosedTabsInfo(v) {
         if (this._previousClosedTabsInfo !== v) {
@@ -47,64 +62,58 @@ export class BrowserService {
                 this._previousClosedTabsInfo
             );
         }
-	}
+    }
 
-	getURL(relativePath){
-		return chrome.runtime.getURL(relativePath);
-	}
-
+    getURL(relativePath) {
+        return chrome.runtime.getURL(relativePath);
+    }
 
     //Tab relative
-    async getAllTabs() {
-		if(!this.allTabs){
-			return new Promise((res, rej) => {
-				let allTabs = [];
-				chrome.windows.getAll({ populate: true }, windows => {
-					_.forEach(windows, window => {
-						chrome.tabs.getAllInWindow(window.id, tabs => {
-							_.forEach(tabs, tab => allTabs.push(tab));
-							this.allTabs = allTabs;
-							res(allTabs);
-						});
-					});
-				});
-			});
-		}
-		else{
-			return this.allTabs;
-		}
+    protected async getAllTabs() {
+        if (!this.allTabs) {
+            return (this.allTabs = _.concat(
+                [],
+                ..._.map(this.allWindows, window => window.tabs)
+            ));
+        } else {
+            return this.allTabs;
+        }
     }
 
     async getCurrentTab() {
-		if(!this.currentTab){
-			return new Promise((res, rej) => {
-				chrome.tabs.getCurrent(tab => {
-					this.currentTab = tab;
-					res(tab);
-				});
-			});
-		}
-		else{
-			return this.currentTab;
-		}
+        if (!this.currentTab) {
+            return new Promise((res, rej) => {
+                chrome.tabs.getCurrent(tab => {
+                    this.currentTab = tab;
+                    res(tab);
+                });
+            });
+        } else {
+            return this.currentTab;
+        }
     }
 
     async createTab(window = this.currentWindow) {
-		if(window){
-			return new Promise((res, rej)=>{
-				chrome.tabs.create({windowId:window.id}, (tab)=>{
-					res(tab);
-				});
-			});
-		}
-		else{
-			return this.getCurrentWindow().then(window =>{
-				chrome.tabs.create({windowId:(<any>window).id}, (tab)=>{
-					return tab;
-				});
-			});
-		}
-	}
+        if (window) {
+            return new Promise((res, rej) => {
+                chrome.tabs.create(
+                    { windowId: window.id, active: true },
+                    tab => {
+                        res(tab);
+                    }
+                );
+            });
+        } else {
+            return this.getCurrentWindow().then(window => {
+                chrome.tabs.create(
+                    { windowId: (<any>window).id, active: true },
+                    tab => {
+                        return tab;
+                    }
+                );
+            });
+        }
+    }
 
     async togglePinTabs(tabs = this.targetTabs) {
         if (tabs) {
@@ -210,9 +219,9 @@ export class BrowserService {
 
     async takeSnapshortForTabs() {}
 
-	async zoom(tab, factor) {}
+    async zoom(tab, factor) {}
 
-	async undoCloseTabs() {
+    async undoCloseTabs() {
         if (this.previousClosedTabsInfo) {
             let windowInfo: any = {};
             return Promise.sequenceHandleAll(
@@ -260,37 +269,41 @@ export class BrowserService {
 
     //Window realtive
     async getWindows() {
-		if(!this.allWindows){
-			return new Promise((res, rej) => {
-				chrome.windows.getAll(
-					{
-						populate: true,
-						windowTypes: ["normal", "popup", "panel", "app", "devtools"]
-					},
-					windows => {
-						this.allWindows = windows;
-						res(windows);
-					}
-				);
-			});
-		}
-		else{
-			return this.allWindows;
-		}
+        if (!this.allWindows) {
+            return new Promise((res, rej) => {
+                chrome.windows.getAll(
+                    {
+                        populate: true,
+                        windowTypes: [
+                            "normal",
+                            "popup",
+                            "panel",
+                            "app",
+                            "devtools"
+                        ]
+                    },
+                    windows => {
+                        this.allWindows = windows;
+                        res(windows);
+                    }
+                );
+            });
+        } else {
+            return this.allWindows;
+        }
     }
 
     async getCurrentWindow() {
-		if(!this.currentWindow){
-			return new Promise(res => {
-				chrome.windows.getCurrent(window => {
-					this.currentWindow = window;
-					res(window);
-				});
-			});
-		}
-		else{
-			return this.currentWindow;
-		}
+        if (!this.currentWindow) {
+            return new Promise(res => {
+                chrome.windows.getCurrent(window => {
+                    this.currentWindow = window;
+                    res(window);
+                });
+            });
+        } else {
+            return this.currentWindow;
+        }
     }
 
     async createWindow() {
@@ -350,79 +363,169 @@ export class BrowserService {
             });
             return this.reloadTabs(tabs);
         }
-	}
+    }
 
-	async openInNewWindow(tabs = this.targetTabs){
-		if(tabs){
-			return new Promise((res, rej)=>{
-				chrome.windows.create((window)=>{
-					let isFirst = true;
-					Promise.sequenceHandleAll(tabs, async (tab, callback)=>{
-						if(isFirst){
-							chrome.tabs.update(window.tabs[0].id, {url:tab.url}, ()=>{
-								isFirst = false;
-								callback();
-							});
-						}
-						else{
-							chrome.tabs.create({url:tab.url, windowId:window.id}, ()=>{
-								callback();
-							});
-						}
-					})
-					.then(()=>res())
-					.catch(e=>rej(e));
-				});
-			});
-		}
-	}
+    async openInNewWindow(tabs = this.targetTabs) {
+        if (tabs) {
+            return new Promise((res, rej) => {
+                chrome.windows.create(window => {
+                    let isFirst = true;
+                    Promise.sequenceHandleAll(tabs, async (tab, callback) => {
+                        if (isFirst) {
+                            chrome.tabs.update(
+                                window.tabs[0].id,
+                                { url: tab.url },
+                                () => {
+                                    isFirst = false;
+                                    callback();
+                                }
+                            );
+                        } else {
+                            chrome.tabs.create(
+                                { url: tab.url, windowId: window.id },
+                                () => {
+                                    callback();
+                                }
+                            );
+                        }
+                    })
+                        .then(() => res())
+                        .catch(e => rej(e));
+                });
+            });
+        }
+    }
 
-	clearAllTargets(){
-		this.targetTabs = null;
-		this.targetWindows = null;
-	}
+    clearAllTargets() {
+        this.targetTabs = null;
+        this.targetWindows = null;
+    }
 
-	clearAllSelected(){
-		if(this.allTabs){
-			_.forEach(this.allTabs, tab=>{
-				tab.isSelected = false;
-			});
-		}
+    clearAllSelected() {
+        if (this.allTabs) {
+            _.forEach(this.allTabs, tab => {
+                tab.isSelected = false;
+            });
+        }
 
-		if(this.allWindows){
-			_.forEach(this.allWindows, window=>{
-				window.isSelected = false;
-			});
-		}
-	}
+        if (this.allWindows) {
+            _.forEach(this.allWindows, window => {
+                window.isSelected = false;
+            });
+        }
+    }
 
-	clearAll(){
-		this.clearAllSelected();
-		this.clearAllTargets();
-	}
+    clearAll() {
+        this.clearAllSelected();
+        this.clearAllTargets();
+    }
 
-	//Browser status monitors
+    //Browser status monitors
     protected startMonitorBrowser() {
-		chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab)=>{
+        this._browserListeners.set(
+            Subjects.tabs_onUpdated,
+            (tabId, changeInfo) => {
+                let tab = _.find(this.allTabs, tab => tab.id === tabId);
+                if (tab) {
+                    _.assign(tab, changeInfo);
+                }
+                this.tabChangedSubject.next({
+                    type: Subjects.tabs_onUpdated,
+                    data: tab
+                });
+            }
+        );
+        this._browserListeners.set(
+            Subjects.tabs_onRemoved,
+            (tabId, removeInfo) => {
+                _.remove(this.allTabs, tab => {
+                    return tab.id === tabId;
+                });
+                this.tabChangedSubject.next({
+                    type: Subjects.tabs_onRemoved,
+                    data: removeInfo
+                });
+            }
+        );
+        this._browserListeners.set(Subjects.tabs_onCreated, tab => {
+            this.allTabs.push(tab);
+            this.tabChangedSubject.next({
+                type: Subjects.tabs_onCreated,
+                data: tab
+            });
+        });
+        this._browserListeners.set(Subjects.tabs_onActivated, activeInfo => {
+            let tab = _.find(
+                this.allTabs,
+                tab =>
+                    tab.id === activeInfo.tabId &&
+                    tab.windowId === activeInfo.windowId
+            );
+            tab.active = true;
+            this.tabChangedSubject.next({
+                type: Subjects.tabs_onActivated,
+                data: tab
+            });
+        });
 
-		});
-		chrome.tabs.onRemoved.addListener((tabId, removeInfo)=>{
+        this._browserListeners.set(Subjects.windows_onRemoved, windowId => {
+            _.remove(this.allWindows, window => window.id === windowId);
+            this.windowChangedSubject.next({
+                type: Subjects.windows_onRemoved,
+                data: windowId
+            });
+        });
+        this._browserListeners.set(Subjects.windows_onCreated, window => {
+            this.allWindows.push(window);
+            this.windowChangedSubject.next({
+                type: Subjects.windows_onCreated,
+                data: window
+            });
+        });
+        this._browserListeners.set(
+            Subjects.windows_onFocusChanged,
+            windowId => {
+                if (windowId !== chrome.windows.WINDOW_ID_NONE) {
+                    if (this.currentWindow) {
+                        this.currentWindow.focused = false;
+                    }
+                    let window = _.find(
+                        this.allWindows,
+                        window => window.id === windowId
+                    );
+                    this.currentWindow = window;
+                } else {
+                    if (this.currentWindow) {
+                        this.currentWindow.focused = false;
+                    }
+                    this.currentWindow = null;
+                }
 
-		});
-		chrome.tabs.onCreated.addListener((tab)=>{
+                this.windowChangedSubject.next({
+                    type: Subjects.windows_onFocusChanged,
+                    data: windowId
+                });
+            }
+        );
 
-		});
-		chrome.tabs.onSelectionChanged.addListener((tabId, selectInfo)=>{
+        this._browserListeners.forEach((listener, eventKeys) => {
+            let keys = eventKeys.split(".");
+            let apiEntry = chrome;
+            for (let k of keys) {
+                apiEntry = apiEntry[k];
+            }
+            (<any>apiEntry).addListener(listener);
+        });
+    }
 
-		});
-		chrome.windows.onRemoved.addListener((windowId)=>{
-			_.remove(this.allWindows, window=>window.id === windowId);
-		});
-		chrome.windows.onCreated.addListener((window)=>{
-			this.allWindows.push(window);
-		});
-		chrome.windows.onFocusChanged.addListener((windowId)=>{
-
-		});
-	}
+    protected stopMonitorBrowser() {
+        this._browserListeners.forEach((listener, eventKeys) => {
+            let keys = eventKeys.split(".");
+            let apiEntry = chrome;
+            for (let k of keys) {
+                apiEntry = apiEntry[k];
+            }
+            (<any>apiEntry).removeListener(listener);
+        });
+    }
 }

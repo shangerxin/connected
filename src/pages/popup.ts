@@ -17,14 +17,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
         TabListComponent,
         ToolbarComponent,
         FilterComponent,
-        BreadcrumbsComponent
+        //BreadcrumbsComponent
     ],
     exports: [],
     bootstrap: [
         TabListComponent,
         ToolbarComponent,
         FilterComponent,
-        BreadcrumbsComponent
+        //BreadcrumbsComponent
     ]
 })
 export class PopupModule {}

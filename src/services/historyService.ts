@@ -20,9 +20,6 @@ export class HistoryService {
 				this.crumbs.push(tab);
 			}
         });
-        browserSerivce.getAllTabs().then(tabs => {
-            this._tabs = tabs;
-        });
     }
 
     //TODO: move into BrowserService

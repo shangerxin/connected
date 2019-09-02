@@ -4,7 +4,7 @@
   "description": "Connected workspaces between different browsers ",
   "main": "main.js",
   "scripts": {
-    "test": "jasmine",
+    "test": "jest",
     "build": "webpack&ng build"
   },
   "keywords": [
@@ -29,6 +29,7 @@
     "glob-fs": "^0.1.7",
     "html-loader": "^0.5.5",
     "jasmine-core": "^3.4.0",
+    "jest": "^24.9.0",
     "json-loader": "^0.5.7",
     "karma": "^4.3.0",
     "karma-chrome-launcher": "^3.1.0",
