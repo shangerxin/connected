@@ -230,7 +230,13 @@ export class TabListComponent implements OnInit, OnDestroy {
                 this.browserService.targetWindows = [window._window];
             }
         }
-    }
+	}
+
+	onSaveSession(window){
+		this.browserService.saveSession(_.map(window._window.tabs, tab=>{
+			return {url:tab.url};
+		}));
+	}
 
     async onClickCloseWindow(window) {
         let targetWindows = [window._window];

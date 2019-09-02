@@ -9,6 +9,7 @@ import { FilterComponent } from "../components/filterComponent";
 import { BreadcrumbsComponent } from "../components/breadcrumbsComponent";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import { InputSessionNameDialogComponent } from "../dialogs/saveSessionDialog";
 
 @NgModule({
     imports: [BrowserModule, FormsModule, NgbModule],
@@ -17,6 +18,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
         TabListComponent,
         ToolbarComponent,
         FilterComponent,
+        InputSessionNameDialogComponent,
         //BreadcrumbsComponent
     ],
     exports: [],
@@ -24,6 +26,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
         TabListComponent,
         ToolbarComponent,
         FilterComponent,
+        InputSessionNameDialogComponent
         //BreadcrumbsComponent
     ]
 })

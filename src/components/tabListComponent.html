@@ -8,10 +8,14 @@
 						 (click)="onSelectWindow(window)">{{window.title}}</button>
 				<span class="col">
 					<span class="row align-items-center justify-content-end">
-						<button class="btn btn-link" type="button">
-							<img class="tab-icon" src="assets/images/export16.png"/>
-						</button>
-						<label>{{window.tabs.length}}</label>
+						<!-- <button class="btn btn-link"
+								type="button"
+								(click)="onSaveSession(window)">
+							<img class="tab-icon" src="assets/images/export16.png"
+							style="margin:-9px 0 0 0"/>
+						</button> -->
+						<save-session-dialog></save-session-dialog>
+						<label style="margin:-5px 3px 0 0">{{window.tabs.length}}</label>
 						<button class="close btn-outline-secondary"
 								(click)="onClickCloseWindow(window)"
 								type="button"
