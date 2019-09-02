@@ -1,9 +1,10 @@
 import * as _ from "lodash";
 
-import { Injectable, EventEmitter } from "@angular/core";
+import { Injectable } from "@angular/core";
 import "../extends/extendPromise";
-import { DBBrowserKeys } from "../environments/globalConstTypes";
+import { DBBrowserKeys, GlobalConst } from "../environments/globalConstTypes";
 import { PersistentService } from "../services/persistentService";
+import { Subject } from "rxjs";
 
 
 @Injectable({
@@ -12,13 +13,15 @@ import { PersistentService } from "../services/persistentService";
 export class BrowserService {
     constructor(private persistentService: PersistentService) {
         this.getCurrentTab();
-        this.getCurrentWindow();
+		this.getCurrentWindow();
+		this.getWindows();
+		this.getAllTabs();
         persistentService
             .get(DBBrowserKeys.previousClosedTabsInfo)
 			.then(v => (this._previousClosedTabsInfo = v));
 
-		this.tabChangedEvent = new EventEmitter<any>();
-		this.windowChangedEvent = new EventEmitter<any>();
+		this.tabChangedSubject = new Subject<any>();
+		this.windowChangedSubject = new Subject<any>();
     }
 
 	allTabs: Array<any>;
@@ -28,8 +31,8 @@ export class BrowserService {
     targetTabs: Array<any>;
 	targetWindows: Array<any>;
 
-	tabChangedEvent:EventEmitter<any>;
-	windowChangedEvent:EventEmitter<any>;
+	tabChangedSubject:Subject<any>;
+	windowChangedSubject:Subject<any>;
 
     private _previousClosedTabsInfo: any;
     protected get previousClosedTabsInfo() {
@@ -53,30 +56,55 @@ export class BrowserService {
 
     //Tab relative
     async getAllTabs() {
-        return new Promise((res, rej) => {
-            let allTabs = [];
-            chrome.windows.getAll({ populate: true }, windows => {
-                _.forEach(windows, window => {
-                    chrome.tabs.getAllInWindow(window.id, tabs => {
-                        _.forEach(tabs, tab => allTabs.push(tab));
-                        this.allTabs = allTabs;
-                        res(allTabs);
-                    });
-                });
-            });
-        });
+		if(!this.allTabs){
+			return new Promise((res, rej) => {
+				let allTabs = [];
+				chrome.windows.getAll({ populate: true }, windows => {
+					_.forEach(windows, window => {
+						chrome.tabs.getAllInWindow(window.id, tabs => {
+							_.forEach(tabs, tab => allTabs.push(tab));
+							this.allTabs = allTabs;
+							res(allTabs);
+						});
+					});
+				});
+			});
+		}
+		else{
+			return this.allTabs;
+		}
     }
 
     async getCurrentTab() {
-        return new Promise((res, rej) => {
-            chrome.tabs.getCurrent(tab => {
-                this.currentTab = tab;
-                res(tab);
-            });
-        });
+		if(!this.currentTab){
+			return new Promise((res, rej) => {
+				chrome.tabs.getCurrent(tab => {
+					this.currentTab = tab;
+					res(tab);
+				});
+			});
+		}
+		else{
+			return this.currentTab;
+		}
     }
 
-    async createTab() {}
+    async createTab(window = this.currentWindow) {
+		if(window){
+			return new Promise((res, rej)=>{
+				chrome.tabs.create({windowId:window.id}, (tab)=>{
+					res(tab);
+				});
+			});
+		}
+		else{
+			return this.getCurrentWindow().then(window =>{
+				chrome.tabs.create({windowId:(<any>window).id}, (tab)=>{
+					return tab;
+				});
+			});
+		}
+	}
 
     async togglePinTabs(tabs = this.targetTabs) {
         if (tabs) {
@@ -232,27 +260,37 @@ export class BrowserService {
 
     //Window realtive
     async getWindows() {
-        return new Promise((res, rej) => {
-            chrome.windows.getAll(
-                {
-                    populate: true,
-                    windowTypes: ["normal", "popup", "panel", "app", "devtools"]
-                },
-                windows => {
-                    this.allWindows = windows;
-                    res(windows);
-                }
-            );
-        });
+		if(!this.allWindows){
+			return new Promise((res, rej) => {
+				chrome.windows.getAll(
+					{
+						populate: true,
+						windowTypes: ["normal", "popup", "panel", "app", "devtools"]
+					},
+					windows => {
+						this.allWindows = windows;
+						res(windows);
+					}
+				);
+			});
+		}
+		else{
+			return this.allWindows;
+		}
     }
 
     async getCurrentWindow() {
-        return new Promise(res => {
-            chrome.windows.getCurrent(window => {
-                this.currentWindow = window;
-                res(window);
-            });
-        });
+		if(!this.currentWindow){
+			return new Promise(res => {
+				chrome.windows.getCurrent(window => {
+					this.currentWindow = window;
+					res(window);
+				});
+			});
+		}
+		else{
+			return this.currentWindow;
+		}
     }
 
     async createWindow() {
@@ -378,10 +416,10 @@ export class BrowserService {
 
 		});
 		chrome.windows.onRemoved.addListener((windowId)=>{
-
+			_.remove(this.allWindows, window=>window.id === windowId);
 		});
 		chrome.windows.onCreated.addListener((window)=>{
-
+			this.allWindows.push(window);
 		});
 		chrome.windows.onFocusChanged.addListener((windowId)=>{
 

@@ -4,7 +4,7 @@
   "description": "Connected workspaces between different browsers ",
   "main": "main.js",
   "scripts": {
-    "test": "jest",
+    "test": "jasmine",
     "build": "webpack&ng build"
   },
   "keywords": [
@@ -12,7 +12,7 @@
     "tab",
     "browser"
   ],
-  "author": "Edwin Shang",
+  "author": "Er-xin(Edwin) Shang",
   "license": "ISC",
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.803.1",

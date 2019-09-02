@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import { OnInit, Component } from "@angular/core";
+import { OnInit, Component, OnDestroy } from "@angular/core";
 
 import {BrowserService} from "../services/browserService";
 import {GlobalConst} from "../environments/globalConstTypes";
@@ -10,23 +10,24 @@ import {GlobalConst} from "../environments/globalConstTypes";
 	templateUrl:'./tabListComponent.html',
 	styleUrls:['./tabListComponent.css']
 })
-export class TabListComponent implements OnInit{
+export class TabListComponent implements OnInit, OnDestroy{
 	public selectedTabs = [];
 	public selectedWindows = [];
 	private _allTabs = null;
 	private _allWindows = null;
+
 	constructor(private browserService:BrowserService){
+		browserService.tabChangedSubject.subscribe()
 	}
 	ngOnInit(): void {
 		this.getTabs();
 		this.getWindows();
 	}
 
-	ngDoCheck(){
-
+	ngOnDestroy(): void {
+		throw new Error("Method not implemented.");
 	}
-
-
+	
 	public get tabs(){
 		return this._allTabs;
 	}
