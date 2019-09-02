@@ -1,9 +1,14 @@
 import * as _ from "lodash";
+import "../extends/extendArray";
 import { OnInit, Component, OnDestroy } from "@angular/core";
 
 import { BrowserService } from "../services/browserService";
-import { GlobalConst } from "../environments/globalConstTypes";
+import { GlobalConst, Subjects } from "../environments/globalConstTypes";
 import { Observable, of, Subscription } from "rxjs";
+import { FilterService } from "../services/filterService";
+import { TabModel } from "../models/tabModel";
+import { WindowModel } from "../models/windowModel";
+import { getWindowTitle as generateWindowTitle } from "../utils";
 
 @Component({
     selector: "ng-tab-list",
@@ -11,61 +16,177 @@ import { Observable, of, Subscription } from "rxjs";
     styleUrls: ["./tabListComponent.css"]
 })
 export class TabListComponent implements OnInit, OnDestroy {
-    private _allWindows = null;
+    private _allWindows;
     private _subscriptions: Array<Subscription>;
 
-    constructor(private browserService: BrowserService) {
-		this._subscriptions = [];
-	}
+    constructor(
+        private browserService: BrowserService,
+        private filterService: FilterService
+    ) {
+        this._subscriptions = [];
+    }
+
+    private _allTabs = [];
+    protected get allTabs() {
+        if (this._allTabs.length === 0 && this._allWindows) {
+            this._allTabs = _.concat(
+                [],
+                ..._.map(this._allWindows, window => window.tabs)
+            );
+        }
+        return this._allTabs;
+    }
+
     ngOnInit(): void {
         this.getWindows().then(() => {
             this._subscriptions.push(
                 this.browserService.tabChangedObservable.subscribe(info => {
-
-				})
+                    switch (info.type) {
+                        case Subjects.tabs_onRemoved: {
+                            this._allWindows.updateWithCondition(
+                                window => window.id === info.data.windowId,
+                                window => {
+                                    _.remove(
+                                        window.tabs,
+                                        tab => (<any>tab).id === info.data.tabId
+                                    );
+                                }
+                            );
+                            break;
+                        }
+                        case Subjects.tabs_onUpdated: {
+                            let newTab = info.data.tab;
+                            if (
+                                this.allTabs &&
+                                newTab &&
+                                newTab.status ===
+                                    GlobalConst.tabUpdateStatusComplete
+                            ) {
+                                let windowModel = _.find(
+                                    this._allWindows,
+                                    window =>
+                                        (<any>window).id === newTab.windowId
+                                );
+                                if (windowModel) {
+                                    TabModel.assign(
+                                        _.find(
+                                            this.allTabs,
+                                            tab => tab.id === info.data.tab.id
+                                        ),
+                                        info.data.tab
+                                    );
+                                } else {
+                                    let browserWindow = _.find(
+                                        this.browserService.allWindows,
+                                        window => window.id === newTab.windowId
+                                    );
+                                    if (browserWindow) {
+                                        windowModel = WindowModel.create(
+                                            browserWindow
+                                        );
+                                        let tabModel = _.find(
+                                            windowModel.tabs,
+                                            tab => (<any>tab).id === newTab.id
+                                        );
+                                        if (tabModel) {
+                                            this._allTabs.push(tabModel);
+                                        } else {
+                                            tabModel = TabModel.create(newTab);
+                                            windowModel.tabs.push(tabModel);
+                                            windowModel.title = generateWindowTitle(
+                                                windowModel
+                                            );
+                                            this._allTabs.push(tabModel);
+                                            this._allWindows.push(windowModel);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                })
             );
             this._subscriptions.push(
-                this.browserService.windowChangedObservable.subscribe(
-                    info => {
-
-					}
-                )
+                this.browserService.windowChangedObservable.subscribe(info => {
+                    switch (info.type) {
+                        case Subjects.windows_onRemoved: {
+                            if (this._allWindows) {
+                                _.remove(
+                                    this._allWindows,
+                                    window =>
+                                        (<WindowModel>window).id ===
+                                        info.data.windowId
+                                ).forEach(window => {
+                                    _.pullAllWith(
+                                        this._allTabs,
+                                        (<any>window).tabs,
+                                        (tabModel, browserTab) => {
+                                            return (
+                                                (<any>tabModel).id ===
+                                                (<any>browserTab).id
+                                            );
+                                        }
+                                    );
+                                });
+                            }
+                            break;
+                        }
+                    }
+                })
+            );
+            this._subscriptions.push(
+                this.filterService.filterObservable.subscribe(filterResult => {
+                    if (filterResult) {
+                        let tabIndexes = new Set(
+                            _.map(filterResult, tab => tab.id)
+                        );
+                        _.forEach(this._allWindows, window => {
+                            _.remove(
+                                window.tabs,
+                                tab => !tabIndexes.has((<any>tab).id)
+                            );
+                        });
+                    } else {
+                        this.getWindows();
+                    }
+                })
             );
         });
     }
 
     ngOnDestroy(): void {
-        _.forEach(this._subscriptions, sub=>sub.unsubscribe());
+        _.forEach(this._subscriptions, sub => sub.unsubscribe());
     }
 
     public get windows(): Observable<Array<any>> {
-        // _.forEach(this._allWindows, window => {
-		// 	window.tabs = of(window.tabs);
-		// });
-        // let windows = of(this._allWindows);
         return this._allWindows;
     }
 
     public onToggleSelected(tab) {
         tab.isSelected = tab.isSelected ? false : true;
-        if(this.browserService.targetTabs){
-			let targetIndex = _.findIndex(this.browserService.targetTabs, tt=>tt.id===tab.id);
-			if(targetIndex !== GlobalConst.notFound){
-				if(!tab.isSelected){
-					_.remove(this.browserService.targetTabs, tt=>tt.id === tab.id);
-				}
-			}
-			else{
-				if(tab.isSelected){
-					this.browserService.targetTabs.push(tab._tab);
-				}
-			}
-		}
-		else{
-			if(tab.isSelected){
-				this.browserService.targetTabs = [tab._tab];
-			}
-		}
+        if (this.browserService.targetTabs) {
+            let targetIndex = _.findIndex(
+                this.browserService.targetTabs,
+                tt => tt.id === tab.id
+            );
+            if (targetIndex !== GlobalConst.notFound) {
+                if (!tab.isSelected) {
+                    _.remove(
+                        this.browserService.targetTabs,
+                        tt => tt.id === tab.id
+                    );
+                }
+            } else {
+                if (tab.isSelected) {
+                    this.browserService.targetTabs.push(tab._tab);
+                }
+            }
+        } else {
+            if (tab.isSelected) {
+                this.browserService.targetTabs = [tab._tab];
+            }
+        }
     }
 
     public onDoubleClickTab(tab) {
@@ -81,59 +202,34 @@ export class TabListComponent implements OnInit, OnDestroy {
     async getWindows() {
         this._allWindows = await this.browserService.getWindows();
         this._allWindows = _.map(this._allWindows, window => {
-            let windowModel = {
-                id: window.id,
-                _window: window,
-                title: "",
-                tabs: [],
-                isSelected: false
-            };
-            let title = window.tabs[0].title ? window.tabs[0].title : "";
-            windowModel.title =
-                title.length > GlobalConst.maxWindowTitleLength
-                    ? title.substring(0, GlobalConst.maxWindowTitleLength) +
-                      "..."
-                    : title;
-            _.forEach(window.tabs, tab => {
-                tab.iconUrl =
-                    tab.url && tab.url.startsWith("chrome:")
-                        ? "assets/images/chrome16.png"
-                        : tab.favIconUrl;
-                windowModel.tabs.push({
-                    id: tab.id,
-                    _tab: tab,
-                    isFilterOut: false,
-                    url: tab.url,
-                    iconUrl: tab.iconUrl,
-                    isSelected: false,
-                    pinned: tab.pinned,
-                    muted: tab.mutedInfo.muted
-                });
-            });
-            return windowModel;
+            return WindowModel.create(window);
         });
     }
 
     async onSelectWindow(window) {
-		window.isSelected = window.isSelected ? false : true;
-        if(this.browserService.targetTabs){
-			let targetIndex = _.findIndex(this.browserService.targetWindows, tt=>tt.id===window.id);
-			if(targetIndex !== GlobalConst.notFound){
-				if(!window.isSelected){
-					_.remove(this.browserService.targetWindows, tw=>tw.id === window.id);
-				}
-			}
-			else{
-				if(window.isSelected){
-					this.browserService.targetTabs.push(window._window);
-				}
-			}
-		}
-		else{
-			if(window.isSelected){
-				this.browserService.targetWindows = [window._window];
-			}
-		}
+        window.isSelected = window.isSelected ? false : true;
+        if (this.browserService.targetTabs) {
+            let targetIndex = _.findIndex(
+                this.browserService.targetWindows,
+                tt => tt.id === window.id
+            );
+            if (targetIndex !== GlobalConst.notFound) {
+                if (!window.isSelected) {
+                    _.remove(
+                        this.browserService.targetWindows,
+                        tw => tw.id === window.id
+                    );
+                }
+            } else {
+                if (window.isSelected) {
+                    this.browserService.targetTabs.push(window._window);
+                }
+            }
+        } else {
+            if (window.isSelected) {
+                this.browserService.targetWindows = [window._window];
+            }
+        }
     }
 
     async onClickCloseWindow(window) {

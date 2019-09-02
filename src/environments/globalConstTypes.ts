@@ -1,4 +1,6 @@
 export const GlobalConst = {
+    extensionUrlPrefix: "chrome:",
+    tabUpdateStatusComplete: "complete",
     notFound: -1,
     crumbMaxLength: 10,
     success: 0,
@@ -14,10 +16,10 @@ export const DBBrowserKeys = {
 
 export const Subjects = {
     tabs_onUpdated: "tabs.onUpdated",
-	tabs_onRemoved: "tabs.onRemoved",
-	tabs_onCreated: "tabs.onCreated",
-	tabs_onActivated: "tabs.onActivated",
-	windows_onRemoved: "windows.onRemoved",
-	windows_onCreated: "windows.onCreated",
-	windows_onFocusChanged: "windows.onFocusChanged"
+    tabs_onRemoved: "tabs.onRemoved",
+    tabs_onCreated: "tabs.onCreated",
+    tabs_onActivated: "tabs.onActivated",
+    windows_onRemoved: "windows.onRemoved",
+    windows_onCreated: "windows.onCreated",
+    windows_onFocusChanged: "windows.onFocusChanged"
 };

@@ -1,0 +1,26 @@
+<p>
+	Session List
+</p>
+<table class="table table-striped">
+	<thead>
+	<tr>
+		<th scope="col">#</th>
+		<th scope="col">Name</th>
+		<th scope="col">Description</th>
+		<th scope="col">Restore</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr *ngFor="let session of sessions; index as i">
+		<th scope="row">{{ i + 1 }}</th>
+		<td>
+			{{ session.name }}
+		</td>
+		<td>{{ session.description}}</td>
+		<td>
+			<button class="btn btn-outline-secondary"
+					(click)="onClickRestoreSession(session)"></button>
+		</td>
+	</tr>
+	</tbody>
+</table>

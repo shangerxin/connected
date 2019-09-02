@@ -9,16 +9,26 @@ import {
 } from "../environments/globalConstTypes";
 import { PersistentService } from "../services/persistentService";
 import { Subject, Observable } from "rxjs";
-import { stringLiteral } from "@babel/types";
 
 @Injectable({
     providedIn: "root"
 })
 export class BrowserService implements OnDestroy {
-    ngOnDestroy(): void {
-        this.clearAll();
-        this.stopMonitorBrowser();
-    }
+    protected allTabs: Array<any>;
+    allWindows: Array<any>;
+    currentTab: any;
+    currentWindow: any;
+    targetTabs: Array<any>;
+    targetWindows: Array<any>;
+
+    tabChangedSubject: Subject<any>;
+    tabChangedObservable: Observable<any>;
+    windowChangedSubject: Subject<any>;
+    windowChangedObservable: Observable<any>;
+
+    private _browserListeners: Map<string, Function>;
+
+    private _previousClosedTabsInfo: any;
     constructor(private persistentService: PersistentService) {
         this.getCurrentTab();
         this.getCurrentWindow();
@@ -35,21 +45,11 @@ export class BrowserService implements OnDestroy {
         this.startMonitorBrowser();
     }
 
-    protected allTabs: Array<any>;
-    allWindows: Array<any>;
-    currentTab: any;
-    currentWindow: any;
-    targetTabs: Array<any>;
-    targetWindows: Array<any>;
+    ngOnDestroy(): void {
+        this.clearAll();
+        this.stopMonitorBrowser();
+    }
 
-    tabChangedSubject: Subject<any>;
-    tabChangedObservable: Observable<any>;
-    windowChangedSubject: Subject<any>;
-    windowChangedObservable: Observable<any>;
-
-    private _browserListeners: Map<string, Function>;
-
-    private _previousClosedTabsInfo: any;
     protected get previousClosedTabsInfo() {
         return this._previousClosedTabsInfo;
     }
@@ -69,7 +69,7 @@ export class BrowserService implements OnDestroy {
     }
 
     //Tab relative
-    protected async getAllTabs() {
+    public async getAllTabs() {
         if (!this.allTabs) {
             return (this.allTabs = _.concat(
                 [],
@@ -312,7 +312,19 @@ export class BrowserService implements OnDestroy {
                 res();
             });
         });
-    }
+	}
+
+	async getAllSessions(){
+		
+	}
+
+	async restoreSession(session){
+
+	}
+
+	async saveSession(session){
+
+	}
 
     async closeWindows(windows = this.targetWindows) {
         if (windows) {
@@ -420,7 +432,7 @@ export class BrowserService implements OnDestroy {
         this.clearAllTargets();
     }
 
-    //Browser status monitors
+    //Browser status monitors, TODO:fix allWindows may be not properly updated tabs
     protected startMonitorBrowser() {
         this._browserListeners.set(
             Subjects.tabs_onUpdated,
@@ -431,7 +443,7 @@ export class BrowserService implements OnDestroy {
                 }
                 this.tabChangedSubject.next({
                     type: Subjects.tabs_onUpdated,
-                    data: tab
+                    data: { tab }
                 });
             }
         );
@@ -443,7 +455,7 @@ export class BrowserService implements OnDestroy {
                 });
                 this.tabChangedSubject.next({
                     type: Subjects.tabs_onRemoved,
-                    data: removeInfo
+                    data: { tabId, windowId: removeInfo.windowId }
                 });
             }
         );
@@ -451,7 +463,7 @@ export class BrowserService implements OnDestroy {
             this.allTabs.push(tab);
             this.tabChangedSubject.next({
                 type: Subjects.tabs_onCreated,
-                data: tab
+                data: { tab }
             });
         });
         this._browserListeners.set(Subjects.tabs_onActivated, activeInfo => {
@@ -461,25 +473,27 @@ export class BrowserService implements OnDestroy {
                     tab.id === activeInfo.tabId &&
                     tab.windowId === activeInfo.windowId
             );
-            tab.active = true;
-            this.tabChangedSubject.next({
-                type: Subjects.tabs_onActivated,
-                data: tab
-            });
+            if (tab) {
+                tab.active = true;
+                this.tabChangedSubject.next({
+                    type: Subjects.tabs_onActivated,
+                    data: { tab }
+                });
+            }
         });
 
         this._browserListeners.set(Subjects.windows_onRemoved, windowId => {
             _.remove(this.allWindows, window => window.id === windowId);
             this.windowChangedSubject.next({
                 type: Subjects.windows_onRemoved,
-                data: windowId
+                data: { windowId }
             });
         });
         this._browserListeners.set(Subjects.windows_onCreated, window => {
             this.allWindows.push(window);
             this.windowChangedSubject.next({
                 type: Subjects.windows_onCreated,
-                data: window
+                data: { window }
             });
         });
         this._browserListeners.set(
@@ -503,7 +517,7 @@ export class BrowserService implements OnDestroy {
 
                 this.windowChangedSubject.next({
                     type: Subjects.windows_onFocusChanged,
-                    data: windowId
+                    data: { windowId }
                 });
             }
         );
