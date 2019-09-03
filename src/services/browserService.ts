@@ -313,16 +313,15 @@ export class BrowserService implements OnDestroy {
     async createWindow() {
         return new Promise(res => {
             chrome.windows.create(window => {
-                res();
+                res(window);
             });
         });
 	}
 
 	async getAllSessions(){
-		// return this.persistentService.getAll((v, k:string)=>{
-		// 	return k && k.startsWith(GlobalConst.sessionIdPrefix);
-		// });
-		return this.persistentService.getAllValues();
+		return this.persistentService.getAllValues((v, k:string)=>{
+			return k && k.startsWith(GlobalConst.sessionIdPrefix);
+		});
 	}
 
 	async updateSessionList(){
@@ -332,10 +331,17 @@ export class BrowserService implements OnDestroy {
 	}
 
 	async restoreSession(session){
+		let newWindow;
 		return Promise.sequenceHandleAll(session.tabs, (tab, callback)=>{
-			this.createWindow().then(window=>{
-				chrome.tabs.create({url:tab.url, windowId:(<any>window).id}, callback);
-			});
+			if(!newWindow){
+				this.createWindow().then(window=>{
+					newWindow = window;
+					chrome.tabs.create({url:tab.url, windowId:(<any>window).id}, callback);
+				});
+			}
+			else{
+				chrome.tabs.create({url:tab.url, windowId:(<any>newWindow).id}, callback);
+			}
 		});
 	}
 

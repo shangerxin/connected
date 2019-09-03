@@ -11,12 +11,12 @@ import { CommunicatorService } from "../services/communicatorService";
     styleUrls: ["./sessionListComponent.css"]
 })
 export class SessionListComponent implements OnInit {
-	@Input()
 	sessions:any;
     constructor(
 		private browserService: BrowserService,
 		private communicationService:CommunicatorService
     ) {
+		this.browserService.getAllSessions().then(v=>this.sessions = v);
 	}
 
     ngOnInit(): void {
