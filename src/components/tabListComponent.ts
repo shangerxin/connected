@@ -1,14 +1,15 @@
 import * as _ from "lodash";
 import "../extends/extendArray";
-import { OnInit, Component, OnDestroy } from "@angular/core";
+import { OnInit, Component, OnDestroy, Input } from "@angular/core";
 
 import { BrowserService } from "../services/browserService";
-import { GlobalConst, Subjects } from "../environments/globalConstTypes";
+import { GlobalConst, Subjects, CommandTypes} from "../environments/globalConstTypes";
 import { Observable, of, Subscription } from "rxjs";
 import { FilterService } from "../services/filterService";
 import { TabModel } from "../models/tabModel";
 import { WindowModel } from "../models/windowModel";
 import { SessionModel } from "../models/sessionModel";
+import { CommandService } from "../services/commandService";
 import { getWindowTitle as generateWindowTitle } from "../utils";
 
 @Component({
@@ -17,16 +18,19 @@ import { getWindowTitle as generateWindowTitle } from "../utils";
     styleUrls: ["./tabListComponent.css"]
 })
 export class TabListComponent implements OnInit, OnDestroy {
-    private _subscriptions: Array<Subscription>;
+	private _subscriptions: Array<Subscription>;
 
     constructor(
         private browserService: BrowserService,
-        private filterService: FilterService
+		private filterService: FilterService,
+		private commandService: CommandService
     ) {
         this._subscriptions = [];
     }
 
-    private _allTabs = [];
+	private _allTabs = [];
+	isDisplaySessionList = false;
+
     protected get allTabs() {
         if (this._allTabs.length === 0 && this._allWindows) {
             this._allTabs = _.concat(
@@ -157,20 +161,18 @@ export class TabListComponent implements OnInit, OnDestroy {
                 })
             );
 		});
-		this.getSessions();
-		this._subscriptions.push(this.browserService.sessionChangedObservable.subscribe(sessions=>{
-			this._sessions = sessions;
-		}));
+		this._subscriptions.push(
+			this.commandService.commandObservable.subscribe(command=>{
+				if(command.type === CommandTypes.toggleSessionList){
+					this.isDisplaySessionList = command.args.isDisplaySessionList;
+				}
+			})
+		);
     }
 
     ngOnDestroy(): void {
         _.forEach(this._subscriptions, sub => sub.unsubscribe());
     }
-
-	private _sessions;
-	public get sessions(): Observable<Array<any>>{
-		return this._sessions
-	}
 
 	private _allWindows;
     public get windows(): Observable<Array<any>> {
@@ -220,10 +222,6 @@ export class TabListComponent implements OnInit, OnDestroy {
         });
 	}
 
-	async getSessions(){
-		this._sessions = await this.browserService.getAllSessions();
-	}
-
     async onSelectWindow(window) {
         window.isSelected = window.isSelected ? false : true;
         if (this.browserService.targetTabs) {
@@ -262,7 +260,8 @@ export class TabListComponent implements OnInit, OnDestroy {
     }
 
     async onClickCloseWindow(window) {
-        let targetWindows = [window._window];
+		let targetWindows = [window._window];
+		_.remove(this._allWindows, w=> (<any>w).id === window.id);
         this.browserService.closeWindows(targetWindows);
-    }
+	}
 }

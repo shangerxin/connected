@@ -33,4 +33,5 @@ import "bootstrap/dist/css/bootstrap.min.css";
         //BreadcrumbsComponent
     ]
 })
-export class PopupModule {}
+export class PopupModule {
+}

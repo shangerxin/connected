@@ -24,3 +24,7 @@ export const Subjects = {
     windows_onCreated: "windows.onCreated",
     windows_onFocusChanged: "windows.onFocusChanged"
 };
+
+export const CommandTypes = {
+	toggleSessionList:"toggleSessionList"
+};

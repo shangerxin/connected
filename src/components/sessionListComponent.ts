@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import { OnInit, Component, Input } from "@angular/core";
+import { OnInit, Component, Input, OnDestroy } from "@angular/core";
 
 import { Observable } from "rxjs";
 import { BrowserService } from "../services/browserService";
@@ -10,8 +10,9 @@ import { CommunicatorService } from "../services/communicatorService";
     templateUrl: "./sessionListComponent.html",
     styleUrls: ["./sessionListComponent.css"]
 })
-export class SessionListComponent implements OnInit {
+export class SessionListComponent implements OnInit, OnDestroy {
 	sessions:any;
+	private _subscriptions = [];
     constructor(
 		private browserService: BrowserService,
 		private communicationService:CommunicatorService
@@ -20,6 +21,13 @@ export class SessionListComponent implements OnInit {
 	}
 
     ngOnInit(): void {
+		this._subscriptions.push(this.browserService.sessionChangedObservable.subscribe(sessions=>{
+			this.sessions = sessions;
+		}));
+	}
+
+	ngOnDestroy(): void {
+		throw new Error("Method not implemented.");
 	}
 
 	onClickRestoreSession(session){

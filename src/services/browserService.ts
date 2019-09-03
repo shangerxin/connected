@@ -331,27 +331,18 @@ export class BrowserService implements OnDestroy {
 	}
 
 	async restoreSession(session){
-		let newWindow;
-		return Promise.sequenceHandleAll(session.tabs, (tab, callback)=>{
-			if(!newWindow){
-				this.createWindow().then(window=>{
-					newWindow = window;
-					chrome.tabs.create({url:tab.url, windowId:(<any>window).id}, callback);
-				});
-			}
-			else{
-				chrome.tabs.create({url:tab.url, windowId:(<any>newWindow).id}, callback);
-			}
-		});
+		return this.openInNewWindow(session.tabs);
 	}
 
 	async deleteSession(session){
-		return this.persistentService.delete(session.id);
+		await this.persistentService.delete(session.id);
+		return this.updateSessionList();
 	}
 
 	async saveSession(session){
 		if(session){
-			return this.persistentService.save(session.id, session);
+			await this.persistentService.save(session.id, session);
+			return this.updateSessionList();
 		}
 	}
 
