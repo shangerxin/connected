@@ -17,9 +17,9 @@ export class FilterService {
         this.filterObservable = this.filterSubject.asObservable();
     }
     public async search(filter) {
+		this.reset();
         return this.browserService.getAllTabs().then(tabs => {
             if (tabs) {
-				this.reset();
                 this.filterResult = [];
                 _.forEach(tabs, tab => {
                     if (

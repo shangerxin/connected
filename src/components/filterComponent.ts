@@ -18,8 +18,13 @@ export class FilterComponent implements OnInit {
     ngOnInit(): void {}
 
     public onKey(value: string) {
-		if(value && value.length > 2){
-			this.filterService.search(this.filter);
+		if(value){
+			if(value.length > 2){
+				this.filterService.search(this.filter);
+			}
+		}
+		else{
+			this.filterService.reset();
 		}
 	}
 
