@@ -6,4 +6,10 @@ import { Injectable } from "@angular/core";
     providedIn: "root"
 })
 export class CommunicatorService {
+	constructor(){
+		
+	}
+	getSessionUrl(session){
+
+	}
 }

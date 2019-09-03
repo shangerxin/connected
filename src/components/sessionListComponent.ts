@@ -1,10 +1,9 @@
 import * as _ from "lodash";
-import { OnInit, Component } from "@angular/core";
+import { OnInit, Component, Input } from "@angular/core";
 
-import { BrowserService } from "../services/browserService";
-import { GlobalConst } from "../environments/globalConstTypes";
-import { PersistentService } from "src/services/persistentService";
 import { Observable } from "rxjs";
+import { BrowserService } from "../services/browserService";
+import { CommunicatorService } from "../services/communicatorService";
 
 @Component({
     selector: "ng-session-list",
@@ -12,17 +11,12 @@ import { Observable } from "rxjs";
     styleUrls: ["./sessionListComponent.css"]
 })
 export class SessionListComponent implements OnInit {
-
+	@Input()
+	sessions:any;
     constructor(
-        private browserService: BrowserService,
-        private persistentService: PersistentService
+		private browserService: BrowserService,
+		private communicationService:CommunicatorService
     ) {
-
-	}
-
-	private _sessionList;
-	get sessionList():Observable<any[]>{
-		return this._sessionList;
 	}
 
     ngOnInit(): void {
@@ -30,5 +24,15 @@ export class SessionListComponent implements OnInit {
 
 	onClickRestoreSession(session){
 		this.browserService.restoreSession(session);
+	}
+
+	onClickExportSession(session){
+		this.communicationService.getSessionUrl(session);
+	}
+
+	onClickDeleteSession(session){
+		this.browserService.deleteSession(session).then(()=>{
+			_.remove(this.sessions, s=>(<any>s).id === session.id);
+		});
 	}
 }

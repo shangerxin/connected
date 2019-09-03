@@ -1,6 +1,7 @@
 export const GlobalConst = {
     extensionUrlPrefix: "chrome:",
-    tabUpdateStatusComplete: "complete",
+	tabUpdateStatusComplete: "complete",
+	sessionIdPrefix:"session:",
     notFound: -1,
     crumbMaxLength: 10,
     success: 0,

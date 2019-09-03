@@ -19,6 +19,7 @@ export class FilterService {
     public async search(filter) {
         return this.browserService.getAllTabs().then(tabs => {
             if (tabs) {
+				this.reset();
                 this.filterResult = [];
                 _.forEach(tabs, tab => {
                     if (

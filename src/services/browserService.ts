@@ -21,7 +21,9 @@ export class BrowserService implements OnDestroy {
     targetTabs: Array<any>;
     targetWindows: Array<any>;
 
-    tabChangedSubject: Subject<any>;
+	sessionChangedSubject:Subject<any>;
+	sessionChangedObservable:Observable<any>;
+	tabChangedSubject: Subject<any>;
     tabChangedObservable: Observable<any>;
     windowChangedSubject: Subject<any>;
     windowChangedObservable: Observable<any>;
@@ -37,10 +39,12 @@ export class BrowserService implements OnDestroy {
             .get(DBBrowserKeys.previousClosedTabsInfo)
             .then(v => (this._previousClosedTabsInfo = v));
 
+		this.sessionChangedSubject = new Subject<any>();
+		this.sessionChangedObservable = this.sessionChangedSubject.asObservable();
         this.tabChangedSubject = new Subject<any>();
         this.tabChangedObservable = this.tabChangedSubject.asObservable();
         this.windowChangedSubject = new Subject<any>();
-        this.windowChangedObservable = this.windowChangedSubject.asObservable();
+		this.windowChangedObservable = this.windowChangedSubject.asObservable();
         this._browserListeners = new Map<string, Function>();
         this.startMonitorBrowser();
     }
@@ -315,15 +319,34 @@ export class BrowserService implements OnDestroy {
 	}
 
 	async getAllSessions(){
-		
+		// return this.persistentService.getAll((v, k:string)=>{
+		// 	return k && k.startsWith(GlobalConst.sessionIdPrefix);
+		// });
+		return this.persistentService.getAllValues();
+	}
+
+	async updateSessionList(){
+		return this.getAllSessions().then(sessions=>{
+			this.sessionChangedSubject.next(sessions);
+		});
 	}
 
 	async restoreSession(session){
+		return Promise.sequenceHandleAll(session.tabs, (tab, callback)=>{
+			this.createWindow().then(window=>{
+				chrome.tabs.create({url:tab.url, windowId:(<any>window).id}, callback);
+			});
+		});
+	}
 
+	async deleteSession(session){
+		return this.persistentService.delete(session.id);
 	}
 
 	async saveSession(session){
-
+		if(session){
+			return this.persistentService.save(session.id, session);
+		}
 	}
 
     async closeWindows(windows = this.targetWindows) {

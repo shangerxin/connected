@@ -1,7 +1,7 @@
-<ng-template #content>
+<ng-template #content let-modal>
 	<div class="modal-header">
-		<h4 class="modal-title" id="modal-basic-title">Input session information</h4>
-		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+		<h4 class="modal-title" id="modal-basic-title">Save session</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
 			<span aria-hidden="true">&times;</span>
 		</button>
 	</div>
@@ -9,17 +9,25 @@
 		<form>
 			<div class="form-group">
 				<label for="sessionName">Name:</label>
-				<input [(ngModel)]="sessionName" id="sessionName" placeholder="Session name" type="text">
+				<input [(ngModel)]="sessionName"
+						name="sessionName"
+						id="sessionName"
+						class="form-control"
+						type="text">
 				<label for="sessionDescription">Description:</label>
-				<input [(ngModel)]="sessonDescription" id="sessionDescription" placeholder="Session description" type="text">
+				<input [(ngModel)]="sessionDescription"
+						class="form-control"
+						name="sessionDescription"
+						id="sessionDescription"
+						type="text">
 			</div>
 		</form>
 	</div>
 	<div class="modal-footer">
-		<button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">Save</button>
+		<button type="button" class="btn btn-outline-secondary" (click)="modal.close()">Save</button>
 	</div>
 </ng-template>
 
-<button class="btn btn-lg btn-outline-secondary" (click)="open(content)">
+<button class="btn btn-link" (click)="open(content)">
 	<img class="tab-icon" src="assets/images/export16.png" style="margin:-9px 0 0 0"/>
 </button>

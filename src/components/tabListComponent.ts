@@ -8,6 +8,7 @@ import { Observable, of, Subscription } from "rxjs";
 import { FilterService } from "../services/filterService";
 import { TabModel } from "../models/tabModel";
 import { WindowModel } from "../models/windowModel";
+import { SessionModel } from "../models/sessionModel";
 import { getWindowTitle as generateWindowTitle } from "../utils";
 
 @Component({
@@ -16,7 +17,6 @@ import { getWindowTitle as generateWindowTitle } from "../utils";
     styleUrls: ["./tabListComponent.css"]
 })
 export class TabListComponent implements OnInit, OnDestroy {
-    private _allWindows;
     private _subscriptions: Array<Subscription>;
 
     constructor(
@@ -51,6 +51,10 @@ export class TabListComponent implements OnInit, OnDestroy {
                                         tab => (<any>tab).id === info.data.tabId
                                     );
                                 }
+                            );
+                            _.remove(
+                                this._allWindows,
+                                window => (<any>window).tabs.length === 0
                             );
                             break;
                         }
@@ -152,13 +156,23 @@ export class TabListComponent implements OnInit, OnDestroy {
                     }
                 })
             );
-        });
+		});
+		this.getSessions();
+		this._subscriptions.push(this.browserService.sessionChangedObservable.subscribe(sessions=>{
+			this._sessions = sessions;
+		}));
     }
 
     ngOnDestroy(): void {
         _.forEach(this._subscriptions, sub => sub.unsubscribe());
     }
 
+	private _sessions;
+	public get sessions(): Observable<Array<any>>{
+		return this._sessions
+	}
+
+	private _allWindows;
     public get windows(): Observable<Array<any>> {
         return this._allWindows;
     }
@@ -204,7 +218,11 @@ export class TabListComponent implements OnInit, OnDestroy {
         this._allWindows = _.map(this._allWindows, window => {
             return WindowModel.create(window);
         });
-    }
+	}
+
+	async getSessions(){
+		this._sessions = await this.browserService.getAllSessions();
+	}
 
     async onSelectWindow(window) {
         window.isSelected = window.isSelected ? false : true;
@@ -230,13 +248,18 @@ export class TabListComponent implements OnInit, OnDestroy {
                 this.browserService.targetWindows = [window._window];
             }
         }
-	}
+    }
 
-	onSaveSession(window){
-		this.browserService.saveSession(_.map(window._window.tabs, tab=>{
-			return {url:tab.url};
-		}));
-	}
+    async onClickSaveSession(sessionInfo, window) {
+        let session = SessionModel.create(
+            sessionInfo.name,
+            sessionInfo.description
+        );
+        session.tabs = _.map(window.tabs, tab => {
+            return { url: tab.url };
+        });
+        this.browserService.saveSession(session);
+    }
 
     async onClickCloseWindow(window) {
         let targetWindows = [window._window];

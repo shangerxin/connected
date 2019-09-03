@@ -46,4 +46,8 @@ export class ToolbarComponent implements OnInit{
 	public onClickOpenInNewWindow(){
 		this.browserService.openInNewWindow();
 	}
+
+	public onClickToggleSessionList(){
+		this.browserService.updateSessionList();
+	}
 }
