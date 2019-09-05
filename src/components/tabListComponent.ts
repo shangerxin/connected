@@ -88,6 +88,7 @@ export class TabListComponent implements OnInit, OnDestroy {
                                         ),
                                         info.data.tab
                                     );
+                                    this.refresh();
                                 } else {
                                     let browserWindow = _.find(
                                         this.browserService.allWindows,
@@ -274,5 +275,13 @@ export class TabListComponent implements OnInit, OnDestroy {
         let targetWindows = [window._window];
         _.remove(this._allWindows, w => (<any>w).id === window.id);
         this.browserService.closeWindows(targetWindows);
+    }
+
+    protected refresh(){
+        if(this._allWindows){
+            let tmp = this._allWindows;
+            this._allWindows = null;
+            this._allWindows = tmp;
+        }
     }
 }

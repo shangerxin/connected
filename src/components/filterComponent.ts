@@ -10,6 +10,7 @@ import { FilterService } from "../services/filterService";
 export class FilterComponent implements OnInit {
     public filter: any;
     filterResult: any;
+    filterPlaceholder:"Search"
 
     constructor(
         private browserService: BrowserService,

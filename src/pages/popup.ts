@@ -27,8 +27,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
     bootstrap: [
         TabListComponent,
         ToolbarComponent,
-        FilterComponent,
-        SessionListComponent
+        FilterComponent
         //InputSessionNameDialogComponent
         //BreadcrumbsComponent
     ]

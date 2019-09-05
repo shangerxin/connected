@@ -16,15 +16,18 @@ export class FilterService {
         this.filterSubject = new Subject<any>();
         this.filterObservable = this.filterSubject.asObservable();
     }
-    public async search(filter) {
+    public async search(filter:string) {
 		this.reset();
         return this.browserService.getAllTabs().then(tabs => {
-            if (tabs) {
+            if (tabs && filter) {
                 this.filterResult = [];
+                filter = filter.toLowerCase();
                 _.forEach(tabs, tab => {
+                    let url = tab.url && tab.url.toLowerCase();
+                    let title = tab.title && tab.title.toLowerCase();
                     if (
-                        tab.url.indexOf(filter) !== GlobalConst.notFound ||
-                        tab.title.indexOf(filter) !== GlobalConst.notFound
+                        url.indexOf(filter) !== GlobalConst.notFound ||
+                        title.indexOf(filter) !== GlobalConst.notFound
                     ) {
                         this.filterResult.push(tab);
                     }
