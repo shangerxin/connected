@@ -4,7 +4,7 @@
 			<ng-template ngbPanelHeader>
 				<div [class]="window.isSelected? 'window-panel-header row align-items-end justify-content-between':'row align-items-end justify-content-between'">
 					<button ngbPanelToggle
-								class="btn btn-link col"
+								class="btn btn-link col-10 justify-content-start"
 								(dblclick)="onDoubleClickWindow(window)"
 								(click)="onSelectWindow(window)">{{window.title}}</button>
 					<span class="col">
@@ -30,6 +30,7 @@
 							(dblclick)="onDoubleClickTab(tab)"
 							[ngbPopover]="popTabContent"
 							[popoverTitle]="popTabTitle"
+							placement="bottom"
 							triggers="mouseenter:mouseleave">
 							<span class="flex-row align-content-center">
 								<img class="tab-icon flex-col" src={{tab.iconUrl}}/>

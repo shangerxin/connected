@@ -8,7 +8,7 @@ export const GlobalConst = {
     failed: -1,
     pass: 0,
     failure: -1,
-    maxWindowTitleLength: 20
+    maxWindowTitleLength: 35
 };
 
 export const DBBrowserKeys = {
