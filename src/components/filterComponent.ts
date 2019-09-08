@@ -1,6 +1,8 @@
 import { OnInit, Component } from "@angular/core";
 import { BrowserService } from "../services/browserService";
 import { FilterService } from "../services/filterService";
+import { from, Observable, Subscriber } from "rxjs";
+import {debounceTime, distinctUntilChanged, switchMap} from "rxjs/operators";
 
 @Component({
     selector: "ng-filter",
@@ -8,20 +10,21 @@ import { FilterService } from "../services/filterService";
     styleUrls: ["./filterComponent.css"]
 })
 export class FilterComponent implements OnInit {
-    public filter: any;
+    public filter;
     filterResult: any;
-    filterPlaceholder:"Search"
+    public filterPlaceholder = "Search";
 
     constructor(
         private browserService: BrowserService,
         private filterService: FilterService
     ) {}
-    ngOnInit(): void {}
+    ngOnInit(): void {
+    }
 
     public onKey(value: string) {
 		if(value){
 			if(value.length > 2){
-				this.filterService.search(this.filter);
+                this.filterService.search(this.filter);
 			}
 		}
 		else{

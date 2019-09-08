@@ -10,12 +10,19 @@ import { GlobalConst, CommandTypes } from "../environments/globalConstTypes";
     styleUrls: ["./toolbarComponent.css"]
 })
 export class ToolbarComponent implements OnInit {
-    private isDisplaySessionList = false;
+    public isDisplaySessionList = false;
     constructor(
         private browserService: BrowserService,
         private commandService: CommandService
     ) {}
     ngOnInit(): void {}
+
+    public onClickDonate(){
+        this.commandService.commandSubject.next({
+            type: CommandTypes.donate,
+            args: {}
+        });
+    }
 
     public onClickPinTabs() {
         this.browserService.togglePinTabs();
@@ -37,7 +44,12 @@ export class ToolbarComponent implements OnInit {
         this.browserService.reloadAllTabs();
     }
 
-    public onClickOptions() {}
+    public onClickOptions() {
+        this.commandService.commandSubject.next({
+            type: CommandTypes.options,
+            args: {}
+        });
+    }
 
     public onClickMutedAll() {
         this.browserService.toggleMutedAllTabs();
@@ -45,6 +57,10 @@ export class ToolbarComponent implements OnInit {
 
     public onClickOpenInNewWindow() {
         this.browserService.openInNewWindow();
+    }
+
+    public onClickMoveToNewWindow(){
+        this.browserService.moveToNewWindow();
     }
 
     public onClickToggleSessionList() {

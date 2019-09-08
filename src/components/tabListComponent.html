@@ -27,7 +27,10 @@
 							*ngIf="!tab.isFilterOut"
 							[class]="tab.isSelected? 'btn btn-outline-success':'btn btn-outline-light'"
 							(click)="onToggleSelected(tab)"
-							(dblclick)="onDoubleClickTab(tab)">
+							(dblclick)="onDoubleClickTab(tab)"
+							[ngbPopover]="popTabContent"
+							[popoverTitle]="popTabTitle"
+							triggers="mouseenter:mouseleave">
 							<span class="flex-row align-content-center">
 								<img class="tab-icon flex-col" src={{tab.iconUrl}}/>
 								<img *ngIf="tab.pinned" src="assets/images/pin16.png"
@@ -36,6 +39,17 @@
 									class="tab-muted-icon flex-col"/>
 							</span>
 					</button>
+					<ng-template #popTabContent>
+						<div style="z-index: 3">
+							{{tab.url}}
+						</div>
+					</ng-template>
+					<ng-template #popTabTitle>
+						<span style="z-index: 3">
+							<img class="tab-icon flex-col" src={{tab.iconUrl}}/>
+							{{tab.title}}
+						</span>
+					</ng-template>
 				</span>
 			</ng-template>
 		</ngb-panel>

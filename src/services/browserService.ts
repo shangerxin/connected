@@ -5,7 +5,8 @@ import "../extends/extendPromise";
 import {
     DBBrowserKeys,
     GlobalConst,
-    Subjects
+    Subjects,
+    WindowStates
 } from "../environments/globalConstTypes";
 import { PersistentService } from "../services/persistentService";
 import { Subject, Observable } from "rxjs";
@@ -21,9 +22,9 @@ export class BrowserService implements OnDestroy {
     targetTabs: Array<any>;
     targetWindows: Array<any>;
 
-	sessionChangedSubject:Subject<any>;
-	sessionChangedObservable:Observable<any>;
-	tabChangedSubject: Subject<any>;
+    sessionChangedSubject: Subject<any>;
+    sessionChangedObservable: Observable<any>;
+    tabChangedSubject: Subject<any>;
     tabChangedObservable: Observable<any>;
     windowChangedSubject: Subject<any>;
     windowChangedObservable: Observable<any>;
@@ -39,12 +40,12 @@ export class BrowserService implements OnDestroy {
             .get(DBBrowserKeys.previousClosedTabsInfo)
             .then(v => (this._previousClosedTabsInfo = v));
 
-		this.sessionChangedSubject = new Subject<any>();
-		this.sessionChangedObservable = this.sessionChangedSubject.asObservable();
+        this.sessionChangedSubject = new Subject<any>();
+        this.sessionChangedObservable = this.sessionChangedSubject.asObservable();
         this.tabChangedSubject = new Subject<any>();
         this.tabChangedObservable = this.tabChangedSubject.asObservable();
         this.windowChangedSubject = new Subject<any>();
-		this.windowChangedObservable = this.windowChangedSubject.asObservable();
+        this.windowChangedObservable = this.windowChangedSubject.asObservable();
         this._browserListeners = new Map<string, Function>();
         this.startMonitorBrowser();
     }
@@ -244,10 +245,10 @@ export class BrowserService implements OnDestroy {
                         );
                     } else {
                         if (!windowInfo.window) {
-                            chrome.windows.create(window => {
+                            this.openNewMaxmizedWindow().then(window => {
                                 windowInfo.window = window;
                                 chrome.tabs.update(
-                                    window.tabs[0].id,
+                                    (<any>window).tabs[0].id,
                                     { url: info.url },
                                     () => {
                                         callback();
@@ -311,40 +312,36 @@ export class BrowserService implements OnDestroy {
     }
 
     async createWindow() {
-        return new Promise(res => {
-            chrome.windows.create(window => {
-                res(window);
-            });
+        return this.openNewMaxmizedWindow();
+    }
+
+    async getAllSessions() {
+        return this.persistentService.getAllValues((v, k: string) => {
+            return k && k.startsWith(GlobalConst.sessionIdPrefix);
         });
-	}
+    }
 
-	async getAllSessions(){
-		return this.persistentService.getAllValues((v, k:string)=>{
-			return k && k.startsWith(GlobalConst.sessionIdPrefix);
-		});
-	}
+    async updateSessionList() {
+        return this.getAllSessions().then(sessions => {
+            this.sessionChangedSubject.next(sessions);
+        });
+    }
 
-	async updateSessionList(){
-		return this.getAllSessions().then(sessions=>{
-			this.sessionChangedSubject.next(sessions);
-		});
-	}
+    async restoreSession(session) {
+        return this.openInNewWindow(session.tabs);
+    }
 
-	async restoreSession(session){
-		return this.openInNewWindow(session.tabs);
-	}
+    async deleteSession(session) {
+        await this.persistentService.delete(session.id);
+        return this.updateSessionList();
+    }
 
-	async deleteSession(session){
-		await this.persistentService.delete(session.id);
-		return this.updateSessionList();
-	}
-
-	async saveSession(session){
-		if(session){
-			await this.persistentService.save(session.id, session);
-			return this.updateSessionList();
-		}
-	}
+    async saveSession(session) {
+        if (session) {
+            await this.persistentService.save(session.id, session);
+            return this.updateSessionList();
+        }
+    }
 
     async closeWindows(windows = this.targetWindows) {
         if (windows) {
@@ -400,12 +397,12 @@ export class BrowserService implements OnDestroy {
     async openInNewWindow(tabs = this.targetTabs) {
         if (tabs) {
             return new Promise((res, rej) => {
-                chrome.windows.create(window => {
+                this.openNewMaxmizedWindow().then(window => {
                     let isFirst = true;
                     Promise.sequenceHandleAll(tabs, async (tab, callback) => {
                         if (isFirst) {
                             chrome.tabs.update(
-                                window.tabs[0].id,
+                                (<any>window).tabs[0].id,
                                 { url: tab.url },
                                 () => {
                                     isFirst = false;
@@ -414,7 +411,7 @@ export class BrowserService implements OnDestroy {
                             );
                         } else {
                             chrome.tabs.create(
-                                { url: tab.url, windowId: window.id },
+                                { url: tab.url, windowId: (<any>window).id },
                                 () => {
                                     callback();
                                 }
@@ -423,6 +420,31 @@ export class BrowserService implements OnDestroy {
                     })
                         .then(() => res())
                         .catch(e => rej(e));
+                });
+            });
+        }
+    }
+
+    async moveToNewWindow(tabs = this.targetTabs) {
+        if (tabs) {
+            return new Promise((res, rej) => {
+                this.openNewMaxmizedWindow().then(window => {
+                    let isFirst = true;
+                    Promise.sequenceHandleAll(tabs, (tab, callback) => {
+                        if (isFirst) {
+                            isFirst = false;
+                            chrome.tabs.update(
+                                (<any>window).tabs[0].id,
+                                { url: tab.url },
+                                callback
+                            );
+                        } else {
+                            chrome.tabs.create(
+                                { url: tab.url, windowId: (<any>window).id },
+                                callback
+                            );
+                        }
+                    }).then(() => this.closeTabs(tabs));
                 });
             });
         }
@@ -560,6 +582,18 @@ export class BrowserService implements OnDestroy {
                 apiEntry = apiEntry[k];
             }
             (<any>apiEntry).removeListener(listener);
+        });
+    }
+
+    protected openNewMaxmizedWindow() {
+        return new Promise((res, rej) => {
+            chrome.windows.create({ state: WindowStates.maximized }, window => {
+                if (chrome.runtime.lastError) {
+                    rej(chrome.runtime.lastError);
+                } else {
+                    res(window);
+                }
+            });
         });
     }
 }

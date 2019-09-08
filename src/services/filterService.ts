@@ -9,18 +9,18 @@ import { GlobalConst } from "../environments/globalConstTypes";
     providedIn: "root"
 })
 export class FilterService {
-    filterSubject: Subject<any>;
-    filterObservable: Observable<any>;
-    filterResult: any;
+    lowerFilterSubject: Subject<any>;
+    lowerFilterObservable: Observable<any>;
+    filterTabsResult: any;
     constructor(private browserService: BrowserService) {
-        this.filterSubject = new Subject<any>();
-        this.filterObservable = this.filterSubject.asObservable();
+        this.lowerFilterSubject = new Subject<any>();
+        this.lowerFilterObservable = this.lowerFilterSubject.asObservable();
     }
     public async search(filter:string) {
 		this.reset();
         return this.browserService.getAllTabs().then(tabs => {
             if (tabs && filter) {
-                this.filterResult = [];
+                this.filterTabsResult = [];
                 filter = filter.toLowerCase();
                 _.forEach(tabs, tab => {
                     let url = tab.url && tab.url.toLowerCase();
@@ -29,21 +29,21 @@ export class FilterService {
                         url.indexOf(filter) !== GlobalConst.notFound ||
                         title.indexOf(filter) !== GlobalConst.notFound
                     ) {
-                        this.filterResult.push(tab);
+                        this.filterTabsResult.push(tab);
                     }
                 });
-				this.filterSubject.next(this.filterResult);
 				if(this.browserService.targetTabs){
-					_.forEach(this.filterResult, tab=>{
-						_.remove(this.browserService.targetTabs, tt=>tt.id===tab.id);
+                    _.forEach(this.filterTabsResult, tab=>{
+                        _.remove(this.browserService.targetTabs, tt=>tt.id===tab.id);
 					});
 				}
-                return this.filterResult;
+                this.lowerFilterSubject.next(filter);
+                return this.filterTabsResult;
             }
         });
 	}
 
 	public reset(){
-		this.filterSubject.next(null);
+		this.lowerFilterSubject.next(null);
 	}
 }

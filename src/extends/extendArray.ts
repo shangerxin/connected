@@ -1,7 +1,8 @@
 interface Array<T> {
     swapToHead(index: number): Array<T>;
-    updateWithCondition(condition: Function, update: Function);
-    insertBy(value: any, index?:number, compare?: Function);
+    updateWithCondition(condition: Function, update: Function):Array<T>;
+    insertBy(value: any, index?:number, compare?: Function):Array<T>;
+    shadowClone():Array<T>;
 }
 
 Array.prototype.swapToHead = function(index): Array<any> {
@@ -62,4 +63,12 @@ Array.prototype.insertBy = function(
 	}
 
     return this;
+};
+
+Array.prototype.shadowClone = function(){
+    let clone = [];
+    for(let i = 0; i < this.length; i ++){
+        clone.push(this[i]);
+    }
+    return clone;
 };

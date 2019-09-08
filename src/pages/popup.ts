@@ -21,15 +21,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
         FilterComponent,
         InputSessionNameDialogComponent,
         SessionListComponent
-        //BreadcrumbsComponent
     ],
     exports: [],
     bootstrap: [
         TabListComponent,
         ToolbarComponent,
         FilterComponent
-        //InputSessionNameDialogComponent
-        //BreadcrumbsComponent
     ]
 })
 export class PopupModule {

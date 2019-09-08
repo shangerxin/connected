@@ -8,7 +8,7 @@ import {
     Subjects,
     CommandTypes
 } from "../environments/globalConstTypes";
-import { Observable, of, Subscription } from "rxjs";
+import { Observable, of, Subscription, from } from "rxjs";
 import { FilterService } from "../services/filterService";
 import { TabModel } from "../models/tabModel";
 import { WindowModel } from "../models/windowModel";
@@ -150,10 +150,11 @@ export class TabListComponent implements OnInit, OnDestroy {
                 })
             );
             this._subscriptions.push(
-                this.filterService.filterObservable.subscribe(filterResult => {
-                    if (filterResult) {
+                this.filterService.lowerFilterObservable.subscribe(filter => {
+                    if (filter) {
+                        let tabs = this.filterService.filterTabsResult;
                         let tabIndexes = new Set(
-                            _.map(filterResult, tab => tab.id)
+                            _.map(tabs, tab => tab.id)
                         );
                         _.forEach(this._allWindows, window => {
                             _.remove(

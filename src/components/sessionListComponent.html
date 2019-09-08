@@ -18,25 +18,35 @@
 			<td>
 				{{ session.name }}
 			</td>
-			<td>{{ session.description}}</td>
 			<td>
 				<button class="btn btn-link"
+					[disabled]="!session.description"
+					ngbTooltip="{{session.description}}">
+					<img class="button-icon"
+						 src="assets/images/notes32.png"/>
+				</button>
+			</td>
+			<td>
+				<button class="btn btn-link"
+						ngbTooltip="Share Session"
 						(click)="onClickExportSession(session)">
 					<img class="button-icon"
 						 src="assets/images/share32.png" />
 				</button></td>
 			<td>
 				<button class="btn btn-link"
+						ngbTooltip="Restore Session"
 						(click)="onClickRestoreSession(session)">
 					<img class="button-icon"
-						src="assets/images/aladdin32.png"/>
+						src="assets/images/open32.png"/>
 				</button>
 			</td>
 			<td>
 				<button class="btn btn-link"
+						ngbTooltip="Delete Session"
 						(click)="onClickDeleteSession(session)">
 					<img class="button-icon"
-						src="assets/images/bin48.png"/>
+						src="assets/images/bin32.png"/>
 				</button>
 			</td>
 		</tr>

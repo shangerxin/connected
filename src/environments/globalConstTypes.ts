@@ -26,5 +26,22 @@ export const Subjects = {
 };
 
 export const CommandTypes = {
-	toggleSessionList:"toggleSessionList"
+    toggleSessionList:"toggleSessionList",
+    donate:"donate",
+    options:"options"
+};
+
+export const WindowStates = {
+    maximized:"maximized",
+    normal:"normal",
+    minimized:"minimized",
+    fullscreen:"fullscreen"
+};
+
+export const WindowType = {
+    normal:"normal",
+    popup:"popup",
+    panel:"panel",
+    app:"app",
+    devtools:"devtools"
 };
