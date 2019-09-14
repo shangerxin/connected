@@ -14,7 +14,8 @@ import "../extends/extendArray";
     styleUrls: ["./sessionListComponent.css"]
 })
 export class SessionListComponent implements OnInit, OnDestroy {
-	private _session;
+    private _session;
+    private _filter;
     public get sessions(): Observable<Array<any>>{
 		return this._session;
 	}
@@ -37,14 +38,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
         );
         this._subscriptions.push(
             this.filterService.lowerFilterObservable.subscribe(filter => {
+                this._filter = filter;
                 if (filter) {
-                    _.remove(
-                        this._session,
-                        (session: SessionModel) =>
-                            session.name &&
-                            session.name.toLowerCase().indexOf(filter) ===
-                                GlobalConst.notFound
-                    );
+                    this.applyfilter(filter);
                 } else {
                     this._session = this._allSessions.shadowClone();
                 }
@@ -67,6 +63,22 @@ export class SessionListComponent implements OnInit, OnDestroy {
     onClickDeleteSession(session) {
         this.browserService.deleteSession(session).then(() => {
             _.remove(this._session, s => (<any>s).id === session.id);
+            _.remove(this._allSessions, s=>(<any>s).id === session.id);
+            this.applyfilter(this._filter);
         });
+    }
+
+    protected applyfilter(filter){
+        if(!filter){
+            return;
+        }
+        
+        _.remove(
+            this._session,
+            (session: SessionModel) =>
+                session.name &&
+                session.name.toLowerCase().indexOf(filter) ===
+                    GlobalConst.notFound
+        );
     }
 }
