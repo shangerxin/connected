@@ -3,18 +3,28 @@
 		<ngb-panel *ngFor="let window of windows; let i = index" id="panel-{{i}}">
 			<ng-template ngbPanelHeader>
 				<div [class]="window.isSelected? 'window-panel-header row align-items-end justify-content-between':'row align-items-end justify-content-between'">
-					<div class="col-10 justify-content-start">
+					<div class="col-9 justify-content-start">
 						<button ngbPanelToggle
 						class="btn btn-link"
 						(dblclick)="onDoubleClickWindow(window)"
 						(click)="onSelectWindow(window)">{{window.title}}</button>
 					</div>
-					<span class="col">
+					<span class="col-3">
 						<span class="row align-items-center justify-content-end">
+							<label ngbTooltip="Number of Tabs" placement="bottom" style="margin:-5px 3px 0 0">{{window.tabs.length}}</label>
+							<button class="btn btn-link"
+									(click)="onFreshCurrentWindow(window)"
+									ngbTooltip="Refresh Window"
+									placement="bottom"
+									style="margin:-5px 0 0 0"
+									type="button">
+								<img class="tab-icon" src="assets/images/refresh16.png">
+							</button>
 							<ng-save-session-dialog (saveSessionEvent)="onClickSaveSession($event, window)"></ng-save-session-dialog>
-							<label style="margin:-5px 3px 0 0">{{window.tabs.length}}</label>
 							<button class="close btn-outline-secondary"
 									(click)="onClickCloseWindow(window)"
+									ngbTooltip="Close Window"
+									placement="left"
 									type="button"
 									style="z-index: 3;margin:-10px 0 0 3px">
 								<span aria-hidden="true">&times;</span>

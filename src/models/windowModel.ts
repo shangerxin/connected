@@ -36,4 +36,17 @@ export class WindowModel {
             windowModel.isFocused = browserWindow.focused;
         }
     }
+
+    static extend(windowModelA: WindowModel, windowModelB:WindowModel){
+        windowModelA._window = windowModelB._window;
+        windowModelA.title = windowModelB.title;
+        _.forEach(windowModelB.tabs, tabB=>{
+            let tabA = _.find(windowModelA.tabs, tabA=>tabA.id === tabB.id);
+            if(tabA){
+                TabModel.extend(tabA, tabB);
+            }
+        });
+        windowModelA.isSelected = windowModelB.isSelected;
+        windowModelA.isFocused = windowModelB.isFocused;
+    }
 }

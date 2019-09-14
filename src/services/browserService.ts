@@ -382,10 +382,10 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async reloadWindows() {
-        if (this.targetWindows) {
+    async reloadWindows(windows=this.targetWindows) {
+        if (windows) {
             let tabs = [];
-            _.forEach(this.targetWindows, window => {
+            _.forEach(windows, window => {
                 _.forEach(window.tabs, tab => {
                     tabs.push(tab);
                 });

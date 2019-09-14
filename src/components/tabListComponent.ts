@@ -47,7 +47,7 @@ export class TabListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.getWindows().then(() => {
+        this.updateWindows().then(() => {
             this._subscriptions.push(
                 this.browserService.tabChangedObservable.subscribe(info => {
                     switch (info.type) {
@@ -153,9 +153,7 @@ export class TabListComponent implements OnInit, OnDestroy {
                 this.filterService.lowerFilterObservable.subscribe(filter => {
                     if (filter) {
                         let tabs = this.filterService.filterTabsResult;
-                        let tabIndexes = new Set(
-                            _.map(tabs, tab => tab.id)
-                        );
+                        let tabIndexes = new Set(_.map(tabs, tab => tab.id));
                         _.forEach(this._allWindows, window => {
                             _.remove(
                                 window.tabs,
@@ -163,7 +161,7 @@ export class TabListComponent implements OnInit, OnDestroy {
                             );
                         });
                     } else {
-                        this.getWindows();
+                        this.updateWindows();
                     }
                 })
             );
@@ -223,12 +221,40 @@ export class TabListComponent implements OnInit, OnDestroy {
         this.browserService.forcusWindow(window._window);
     }
 
-    async getWindows() {
-        this._allWindows = await this.browserService.getWindows();
-        this._allWindows = _.map(this._allWindows, window => {
-            return WindowModel.create(window);
+    public onFreshCurrentWindow(window){
+        this.browserService.reloadWindows([window]);
+    }
+
+    async updateWindows() {
+        let previousWindows: Map<number, WindowModel> =
+            this._allWindows &&
+            new Map(_.map(this._allWindows, window => [window.id, window]));
+        let allWindows = await this.browserService.getWindows();
+        allWindows = _.map(<any>allWindows, window => {
+            let wm = WindowModel.create(window);
+            if(previousWindows && previousWindows.has(window.id)){
+                let pw = previousWindows.get(window.id);
+                wm.isSelected = pw.isSelected;
+                _.forEach(pw.tabs, (tabPre:TabModel) =>{
+                    let tab:TabModel = _.find(wm.tabs, tab=>tab.id === tabPre.id);
+                    if(tab){
+                        tab.isSelected = tabPre.isSelected;
+                        tab.isFilterOut = tab.isFilterOut;
+                    }
+                });
+            }
+            return wm;
         });
 
+        if(this._allWindows){
+            _.remove(this._allWindows, ()=>true);
+        }
+        else{
+            this._allWindows = [];
+        }
+        _.forEach(<any>allWindows, window=>{
+            this._allWindows.push(window);
+        })
         this.activeIds = [];
         for (let i = 0; i < this._allWindows.length; i++) {
             this.activeIds.push(`panel-${i}`);
@@ -278,8 +304,8 @@ export class TabListComponent implements OnInit, OnDestroy {
         this.browserService.closeWindows(targetWindows);
     }
 
-    protected refresh(){
-        if(this._allWindows){
+    protected refresh() {
+        if (this._allWindows) {
             let tmp = this._allWindows;
             this._allWindows = null;
             this._allWindows = tmp;

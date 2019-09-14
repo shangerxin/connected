@@ -7,6 +7,7 @@
 			<th scope="col">#</th>
 			<th scope="col">Name</th>
 			<th scope="col">Description</th>
+			<th scope="col">Tabs</th>
 			<th scope="col">Export</th>
 			<th scope="col">Restore</th>
 			<th scope="col">Delete</th>
@@ -25,6 +26,9 @@
 					<img class="button-icon"
 						 src="assets/images/notes32.png"/>
 				</button>
+			</td>
+			<td>
+				<span ngbTooltip="Number of Tabs">{{ session.tabs.length }}</span>
 			</td>
 			<td>
 				<button class="btn btn-link"
