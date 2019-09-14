@@ -3,10 +3,12 @@
 		<ngb-panel *ngFor="let window of windows; let i = index" id="panel-{{i}}">
 			<ng-template ngbPanelHeader>
 				<div [class]="window.isSelected? 'window-panel-header row align-items-end justify-content-between':'row align-items-end justify-content-between'">
-					<button ngbPanelToggle
-								class="btn btn-link col-10 justify-content-start"
-								(dblclick)="onDoubleClickWindow(window)"
-								(click)="onSelectWindow(window)">{{window.title}}</button>
+					<div class="col-10 justify-content-start">
+						<button ngbPanelToggle
+						class="btn btn-link"
+						(dblclick)="onDoubleClickWindow(window)"
+						(click)="onSelectWindow(window)">{{window.title}}</button>
+					</div>
 					<span class="col">
 						<span class="row align-items-center justify-content-end">
 							<ng-save-session-dialog (saveSessionEvent)="onClickSaveSession($event, window)"></ng-save-session-dialog>
@@ -28,9 +30,7 @@
 							[class]="tab.isSelected? 'btn btn-outline-success':'btn btn-outline-light'"
 							(click)="onToggleSelected(tab)"
 							(dblclick)="onDoubleClickTab(tab)"
-							[ngbPopover]="popTabContent"
-							[popoverTitle]="popTabTitle"
-							placement="bottom"
+							[ngbTooltip]="popTabTitle"
 							triggers="mouseenter:mouseleave">
 							<span class="flex-row align-content-center">
 								<img class="tab-icon flex-col" src={{tab.iconUrl}}/>
@@ -40,13 +40,8 @@
 									class="tab-muted-icon flex-col"/>
 							</span>
 					</button>
-					<ng-template #popTabContent>
-						<div style="z-index: 3">
-							{{tab.url}}
-						</div>
-					</ng-template>
 					<ng-template #popTabTitle>
-						<span style="z-index: 3">
+						<span>
 							<img class="tab-icon flex-col" src={{tab.iconUrl}}/>
 							{{tab.title}}
 						</span>
