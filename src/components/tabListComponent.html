@@ -35,27 +35,9 @@
 			</ng-template>
 			<ng-template ngbPanelContent>
 				<span *ngFor="let tab of window.tabs">
-					<button type="button"
-							*ngIf="!tab.isFilterOut"
-							[class]="tab.isSelected? 'btn btn-outline-success':'btn btn-outline-light'"
-							(click)="onToggleSelected(tab)"
-							(dblclick)="onDoubleClickTab(tab)"
-							[ngbTooltip]="popTabTitle"
-							triggers="mouseenter:mouseleave">
-							<span class="flex-row align-content-center">
-								<img class="tab-icon flex-col" src={{tab.iconUrl}}/>
-								<img *ngIf="tab.pinned" src="assets/images/pin16.png"
-									class="tab-pin-icon flex-col"/>
-								<img *ngIf="tab.muted" src="assets/images/muted16.png"
-									class="tab-muted-icon flex-col"/>
-							</span>
-					</button>
-					<ng-template #popTabTitle>
-						<span>
-							<img class="tab-icon flex-col" src={{tab.iconUrl}}/>
-							{{tab.title}}
-						</span>
-					</ng-template>
+					<ng-tab [tabModel]="tab"
+							(toggleSelectedEvent)="onToggleSelected($event)"
+							(doubleClickedEvent)="onDoubleClickTab($event)" ></ng-tab>
 				</span>
 			</ng-template>
 		</ngb-panel>

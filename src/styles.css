@@ -1,0 +1,19 @@
+.tab-icon
+{
+	width:16px;
+	height:16px;
+}
+
+.tab-pin-icon
+{
+	width: 50%;
+	height: 50%;
+	margin:-20px -16px 0px 0px;
+}
+
+.tab-muted-icon
+{
+	width: 50%;
+	height: 50%;
+	margin:-20px -13px 0px 0px;
+}

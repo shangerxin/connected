@@ -28,7 +28,15 @@ export const Subjects = {
 export const CommandTypes = {
     toggleSessionList:"toggleSessionList",
     donate:"donate",
-    options:"options"
+    options:"options",
+    togglePinTabs:"togglePinTabs",
+    closeTabs:"closeTabs",
+    undoCloseTabs:"undoCloseTabs",
+    refreshTabs:"refreshTabs",
+    refreshAllTabs:"refreshAllTabs",
+    multedAllTabs:"muteAllTabs",
+    openNewInWindow:"openNewInWindow",
+    moveToNewWindow:"moveToNewWindow",
 };
 
 export const WindowStates = {
@@ -43,5 +51,6 @@ export const WindowType = {
     popup:"popup",
     panel:"panel",
     app:"app",
-    devtools:"devtools"
+    devtools:"devtools",
+    allTypes: ["normal", "popup", "panel", "app", "devtools"]
 };

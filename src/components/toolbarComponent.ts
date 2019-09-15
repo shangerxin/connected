@@ -24,24 +24,45 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
-    public onClickPinTabs() {
-        this.browserService.togglePinTabs();
+    public onClickTogglePinTabs() {
+        this.browserService.togglePinTabs().then(()=>{
+            this.commandService.commandSubject.next({
+                type: CommandTypes.togglePinTabs,
+                args: {}
+            });
+        });
     }
 
     public onClickCloseTabs() {
         this.browserService.closeTabs();
+        this.commandService.commandSubject.next({
+            type: CommandTypes.closeTabs,
+            args: {}
+        });
     }
 
     public onClickUndoCloseTabs() {
         this.browserService.undoCloseTabs();
+        this.commandService.commandSubject.next({
+            type: CommandTypes.undoCloseTabs,
+            args: {}
+        });
     }
 
     public onClickRefreshTabs() {
         this.browserService.reloadTabs();
+        this.commandService.commandSubject.next({
+            type: CommandTypes.refreshTabs,
+            args: {}
+        });
     }
 
     public onClickRefreshAllTab() {
         this.browserService.reloadAllTabs();
+        this.commandService.commandSubject.next({
+            type: CommandTypes.refreshAllTabs,
+            args: {}
+        });
     }
 
     public onClickOptions() {
@@ -53,14 +74,26 @@ export class ToolbarComponent implements OnInit {
 
     public onClickMutedAll() {
         this.browserService.toggleMutedAllTabs();
+        this.commandService.commandSubject.next({
+            type: CommandTypes.multedAllTabs,
+            args: {}
+        });
     }
 
     public onClickOpenInNewWindow() {
         this.browserService.openInNewWindow();
+        this.commandService.commandSubject.next({
+            type: CommandTypes.openNewInWindow,
+            args: {}
+        });
     }
 
     public onClickMoveToNewWindow(){
         this.browserService.moveToNewWindow();
+        this.commandService.commandSubject.next({
+            type: CommandTypes.moveToNewWindow,
+            args: {}
+        });
     }
 
     public onClickToggleSessionList() {

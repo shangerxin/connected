@@ -6,7 +6,8 @@ import {
     DBBrowserKeys,
     GlobalConst,
     Subjects,
-    WindowStates
+    WindowStates,
+    WindowType
 } from "../environments/globalConstTypes";
 import { PersistentService } from "../services/persistentService";
 import { Subject, Observable } from "rxjs";
@@ -15,10 +16,6 @@ import { Subject, Observable } from "rxjs";
     providedIn: "root"
 })
 export class BrowserService implements OnDestroy {
-    protected allTabs: Array<any>;
-    allWindows: Array<any>;
-    currentTab: any;
-    currentWindow: any;
     targetTabs: Array<any>;
     targetWindows: Array<any>;
 
@@ -33,9 +30,6 @@ export class BrowserService implements OnDestroy {
 
     private _previousClosedTabsInfo: any;
     constructor(private persistentService: PersistentService) {
-        this.getCurrentTab();
-        this.getCurrentWindow();
-        this.getWindows().then(() => this.getAllTabs());
         persistentService
             .get(DBBrowserKeys.previousClosedTabsInfo)
             .then(v => (this._previousClosedTabsInfo = v));
@@ -51,7 +45,6 @@ export class BrowserService implements OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.clearAll();
         this.stopMonitorBrowser();
     }
 
@@ -74,31 +67,32 @@ export class BrowserService implements OnDestroy {
     }
 
     //Tab relative
-    public async getAllTabs() {
-        if (!this.allTabs) {
-            return (this.allTabs = _.concat(
-                [],
-                ..._.map(this.allWindows, window => window.tabs)
-            ));
-        } else {
-            return this.allTabs;
-        }
+    public async getAllTabs(): Promise<Array<any>> {
+        let allTabs = [];
+        return new Promise(res => {
+            chrome.windows.getAll(
+                { windowTypes: WindowType.allTypes, populate: true },
+                windows => {
+                    Promise.sequenceHandleAll(windows, (window, callback) => {
+                        chrome.tabs.query({ windowId: window.id }, tabs => {
+                            _.forEach(tabs, tab => allTabs.push(tab));
+                            callback();
+                        });
+                    }).then(() => res(allTabs));
+                }
+            );
+        });
     }
 
     async getCurrentTab() {
-        if (!this.currentTab) {
-            return new Promise((res, rej) => {
-                chrome.tabs.getCurrent(tab => {
-                    this.currentTab = tab;
-                    res(tab);
-                });
+        return new Promise(res => {
+            chrome.tabs.getCurrent(tab => {
+                res(tab);
             });
-        } else {
-            return this.currentTab;
-        }
+        });
     }
 
-    async createTab(window = this.currentWindow) {
+    async createTab(window) {
         if (window) {
             return new Promise((res, rej) => {
                 chrome.tabs.create(
@@ -215,8 +209,11 @@ export class BrowserService implements OnDestroy {
                 this.targetTabs[0]);
         if (tab) {
             return new Promise(res => {
-                chrome.tabs.update(tab.id, { active: true }, () => {
-                    res();
+                chrome.windows.get(tab.windowId, async window => {
+                    await this.focusWindow(window);
+                    chrome.tabs.update(tab.id, { active: true }, () => {
+                        res();
+                    });
                 });
             });
         }
@@ -232,9 +229,9 @@ export class BrowserService implements OnDestroy {
             return Promise.sequenceHandleAll(
                 this.previousClosedTabsInfo,
                 async (info, callback) => {
-                    await this.getWindows();
+                    let allWindows = await this.getWindows();
                     let windowIds = new Set(
-                        _.map(this.allWindows, window => window.id)
+                        _.map(allWindows, window => window.id)
                     );
                     if (windowIds.has(info.windowId)) {
                         chrome.tabs.create(
@@ -273,42 +270,24 @@ export class BrowserService implements OnDestroy {
     }
 
     //Window realtive
-    async getWindows() {
-        if (!this.allWindows) {
-            return new Promise((res, rej) => {
-                chrome.windows.getAll(
-                    {
-                        populate: true,
-                        windowTypes: [
-                            "normal",
-                            "popup",
-                            "panel",
-                            "app",
-                            "devtools"
-                        ]
-                    },
-                    windows => {
-                        this.allWindows = windows;
-                        res(windows);
-                    }
-                );
-            });
-        } else {
-            return this.allWindows;
-        }
+    async getWindows(): Promise<Array<any>> {
+        return new Promise(res => {
+            chrome.windows.getAll(
+                {
+                    populate: true,
+                    windowTypes: WindowType.allTypes
+                },
+                windows => res(windows)
+            );
+        });
     }
 
     async getCurrentWindow() {
-        if (!this.currentWindow) {
-            return new Promise(res => {
-                chrome.windows.getCurrent(window => {
-                    this.currentWindow = window;
-                    res(window);
-                });
+        return new Promise(res => {
+            chrome.windows.getCurrent(window => {
+                res(window);
             });
-        } else {
-            return this.currentWindow;
-        }
+        });
     }
 
     async createWindow() {
@@ -367,7 +346,7 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async forcusWindow(window = null) {
+    async focusWindow(window = null) {
         window =
             window ||
             (this.targetWindows &&
@@ -382,7 +361,7 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async reloadWindows(windows=this.targetWindows) {
+    async reloadWindows(windows = this.targetWindows) {
         if (windows) {
             let tabs = [];
             _.forEach(windows, window => {
@@ -450,89 +429,62 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    clearAllTargets() {
+    async clearAllTargets() {
         this.targetTabs = null;
         this.targetWindows = null;
     }
 
-    clearAllSelected() {
-        if (this.allTabs) {
-            _.forEach(this.allTabs, tab => {
-                tab.isSelected = false;
-            });
-        }
-
-        if (this.allWindows) {
-            _.forEach(this.allWindows, window => {
-                window.isSelected = false;
-            });
-        }
+    async clearAll() {
+        await this.clearAllTargets();
     }
 
-    clearAll() {
-        this.clearAllSelected();
-        this.clearAllTargets();
-    }
-
-    //Browser status monitors, TODO:fix allWindows may be not properly updated tabs
-    protected startMonitorBrowser() {
+    protected async startMonitorBrowser() {
         this._browserListeners.set(
             Subjects.tabs_onUpdated,
-            (tabId, changeInfo) => {
-                let tab = _.find(this.allTabs, tab => tab.id === tabId);
-                if (tab) {
-                    _.assign(tab, changeInfo);
-                }
-                this.tabChangedSubject.next({
-                    type: Subjects.tabs_onUpdated,
-                    data: { tab }
+            async (tabId, changeInfo) => {
+                chrome.tabs.get(tabId, tab => {
+                    if (tab) {
+                        _.assign(tab, changeInfo);
+                    }
+                    this.tabChangedSubject.next({
+                        type: Subjects.tabs_onUpdated,
+                        data: { tab, changeInfo }
+                    });
                 });
             }
         );
         this._browserListeners.set(
             Subjects.tabs_onRemoved,
-            (tabId, removeInfo) => {
-                _.remove(this.allTabs, tab => {
-                    return tab.id === tabId;
-                });
+            async (tabId, removeInfo) => {
                 this.tabChangedSubject.next({
                     type: Subjects.tabs_onRemoved,
                     data: { tabId, windowId: removeInfo.windowId }
                 });
             }
         );
-        this._browserListeners.set(Subjects.tabs_onCreated, tab => {
-            this.allTabs.push(tab);
+        this._browserListeners.set(Subjects.tabs_onCreated, async tab => {
             this.tabChangedSubject.next({
                 type: Subjects.tabs_onCreated,
                 data: { tab }
             });
         });
         this._browserListeners.set(Subjects.tabs_onActivated, activeInfo => {
-            let tab = _.find(
-                this.allTabs,
-                tab =>
-                    tab.id === activeInfo.tabId &&
-                    tab.windowId === activeInfo.windowId
-            );
-            if (tab) {
+            chrome.tabs.get(activeInfo.tabId, tab => {
                 tab.active = true;
                 this.tabChangedSubject.next({
                     type: Subjects.tabs_onActivated,
                     data: { tab }
                 });
-            }
+            });
         });
 
         this._browserListeners.set(Subjects.windows_onRemoved, windowId => {
-            _.remove(this.allWindows, window => window.id === windowId);
             this.windowChangedSubject.next({
                 type: Subjects.windows_onRemoved,
                 data: { windowId }
             });
         });
         this._browserListeners.set(Subjects.windows_onCreated, window => {
-            this.allWindows.push(window);
             this.windowChangedSubject.next({
                 type: Subjects.windows_onCreated,
                 data: { window }
@@ -541,22 +493,6 @@ export class BrowserService implements OnDestroy {
         this._browserListeners.set(
             Subjects.windows_onFocusChanged,
             windowId => {
-                if (windowId !== chrome.windows.WINDOW_ID_NONE) {
-                    if (this.currentWindow) {
-                        this.currentWindow.focused = false;
-                    }
-                    let window = _.find(
-                        this.allWindows,
-                        window => window.id === windowId
-                    );
-                    this.currentWindow = window;
-                } else {
-                    if (this.currentWindow) {
-                        this.currentWindow.focused = false;
-                    }
-                    this.currentWindow = null;
-                }
-
                 this.windowChangedSubject.next({
                     type: Subjects.windows_onFocusChanged,
                     data: { windowId }

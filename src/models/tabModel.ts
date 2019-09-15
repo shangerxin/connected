@@ -29,7 +29,7 @@ export class TabModel {
     }
 
     static assign(tabModel: TabModel, browserTab) {
-        if (tabModel.id === browserTab.id) {
+        if (browserTab && tabModel.id === browserTab.id) {
             tabModel._tab = browserTab;
             tabModel.url = browserTab.url;
             tabModel.pinned = browserTab.pinned;
@@ -42,15 +42,17 @@ export class TabModel {
     }
 
     static extend(tabModelA: TabModel, tabModelB: TabModel) {
-        tabModelA._tab = tabModelB._tab;
-        tabModelA.isFilterOut = tabModelB.isFilterOut;
-        tabModelA.url = tabModelB.url;
-        tabModelA.isSelected = tabModelB.isSelected;
-        tabModelA.pinned = tabModelB.pinned;
-        
-        tabModelA.muted = tabModelB.muted;
-        tabModelA.iconUrl = tabModelB.iconUrl;
-        tabModelA.isActive = tabModelB.isActive;
-        tabModelA.title = tabModelB.title;
+        if(tabModelA && tabModelB){
+            tabModelA._tab = tabModelB._tab;
+            tabModelA.isFilterOut = tabModelB.isFilterOut;
+            tabModelA.url = tabModelB.url;
+            tabModelA.isSelected = tabModelB.isSelected;
+            tabModelA.pinned = tabModelB.pinned;
+
+            tabModelA.muted = tabModelB.muted;
+            tabModelA.iconUrl = tabModelB.iconUrl;
+            tabModelA.isActive = tabModelB.isActive;
+            tabModelA.title = tabModelB.title;
+        }
     }
 }

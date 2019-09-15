@@ -37,7 +37,7 @@ export class TabListComponent implements OnInit, OnDestroy {
     isDisplaySessionList = false;
 
     protected get allTabs() {
-        if (this._allTabs.length === 0 && this._allWindows) {
+        if (this._allWindows) {
             this._allTabs = _.concat(
                 [],
                 ..._.map(this._allWindows, window => window.tabs)
@@ -49,78 +49,86 @@ export class TabListComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.updateWindows().then(() => {
             this._subscriptions.push(
-                this.browserService.tabChangedObservable.subscribe(info => {
-                    switch (info.type) {
-                        case Subjects.tabs_onRemoved: {
-                            this._allWindows.updateWithCondition(
-                                window => window.id === info.data.windowId,
-                                window => {
-                                    _.remove(
-                                        window.tabs,
-                                        tab => (<any>tab).id === info.data.tabId
-                                    );
-                                }
-                            );
-                            _.remove(
-                                this._allWindows,
-                                window => (<any>window).tabs.length === 0
-                            );
-                            break;
-                        }
-                        case Subjects.tabs_onUpdated: {
-                            let newTab = info.data.tab;
-                            if (
-                                this.allTabs &&
-                                newTab &&
-                                newTab.status ===
-                                    GlobalConst.tabUpdateStatusComplete
-                            ) {
-                                let windowModel = _.find(
-                                    this._allWindows,
-                                    window =>
-                                        (<any>window).id === newTab.windowId
+                this.browserService.tabChangedObservable.subscribe(
+                    async info => {
+                        switch (info.type) {
+                            case Subjects.tabs_onRemoved: {
+                                this._allWindows.updateWithCondition(
+                                    window => window.id === info.data.windowId,
+                                    window => {
+                                        _.remove(
+                                            window.tabs,
+                                            tab =>
+                                                (<any>tab).id ===
+                                                info.data.tabId
+                                        );
+                                    }
                                 );
-                                if (windowModel) {
-                                    TabModel.assign(
-                                        _.find(
-                                            this.allTabs,
-                                            tab => tab.id === info.data.tab.id
-                                        ),
-                                        info.data.tab
+                                _.remove(
+                                    this._allWindows,
+                                    window => (<any>window).tabs.length === 0
+                                );
+                                break;
+                            }
+                            case Subjects.tabs_onUpdated: {
+                                let newTab = info.data.tab;
+                                if (this.allTabs && newTab) {
+                                    let windowModel = _.find(
+                                        this._allWindows,
+                                        window =>
+                                            (<any>window).id === newTab.windowId
                                     );
-                                    this.refresh();
-                                } else {
-                                    let browserWindow = _.find(
-                                        this.browserService.allWindows,
-                                        window => window.id === newTab.windowId
-                                    );
-                                    if (browserWindow) {
-                                        windowModel = WindowModel.create(
-                                            browserWindow
+                                    if (windowModel) {
+                                        TabModel.assign(
+                                            _.find(
+                                                this.allTabs,
+                                                tab =>
+                                                    tab.id === info.data.tab.id
+                                            ),
+                                            info.data.tab
                                         );
-                                        let tabModel = _.find(
-                                            windowModel.tabs,
-                                            tab => (<any>tab).id === newTab.id
+                                        this.refresh();
+                                    } else {
+                                        let allWindows = await this.browserService.getWindows();
+                                        let browserWindow = _.find(
+                                            allWindows,
+                                            window =>
+                                                window.id === newTab.windowId
                                         );
-                                        if (tabModel) {
-                                            this._allTabs.push(tabModel);
-                                        } else {
-                                            tabModel = TabModel.create(newTab);
-                                            windowModel.tabs.push(tabModel);
-                                            windowModel.title = generateWindowTitle(
-                                                windowModel
+                                        if (browserWindow) {
+                                            windowModel = WindowModel.create(
+                                                browserWindow
                                             );
-                                            this._allTabs.push(tabModel);
-                                            this._allWindows.push(windowModel);
+                                            let tabModel = _.find(
+                                                windowModel.tabs,
+                                                tab =>
+                                                    (<any>tab).id === newTab.id
+                                            );
+                                            if (tabModel) {
+                                                this._allTabs.push(tabModel);
+                                            } else {
+                                                tabModel = TabModel.create(
+                                                    newTab
+                                                );
+                                                windowModel.tabs.push(tabModel);
+                                                windowModel.title = generateWindowTitle(
+                                                    windowModel
+                                                );
+                                                this._allTabs.push(tabModel);
+                                                this._allWindows.push(
+                                                    windowModel
+                                                );
+                                            }
                                         }
                                     }
                                 }
+                                break;
                             }
-                            break;
                         }
                     }
-                })
+                )
             );
+
             this._subscriptions.push(
                 this.browserService.windowChangedObservable.subscribe(info => {
                     switch (info.type) {
@@ -149,6 +157,7 @@ export class TabListComponent implements OnInit, OnDestroy {
                     }
                 })
             );
+
             this._subscriptions.push(
                 this.filterService.lowerFilterObservable.subscribe(filter => {
                     if (filter) {
@@ -161,19 +170,20 @@ export class TabListComponent implements OnInit, OnDestroy {
                             );
                         });
                     } else {
-                        this.updateWindows();
+                        this.updateWindows(true);
+                    }
+                })
+            );
+
+            this._subscriptions.push(
+                this.commandService.commandObservable.subscribe(command => {
+                    if (command.type === CommandTypes.toggleSessionList) {
+                        this.isDisplaySessionList =
+                            command.args.isDisplaySessionList;
                     }
                 })
             );
         });
-        this._subscriptions.push(
-            this.commandService.commandObservable.subscribe(command => {
-                if (command.type === CommandTypes.toggleSessionList) {
-                    this.isDisplaySessionList =
-                        command.args.isDisplaySessionList;
-                }
-            })
-        );
     }
 
     ngOnDestroy(): void {
@@ -186,7 +196,6 @@ export class TabListComponent implements OnInit, OnDestroy {
     }
 
     public onToggleSelected(tab) {
-        tab.isSelected = tab.isSelected ? false : true;
         if (this.browserService.targetTabs) {
             let targetIndex = _.findIndex(
                 this.browserService.targetTabs,
@@ -211,33 +220,37 @@ export class TabListComponent implements OnInit, OnDestroy {
         }
     }
 
-    public onDoubleClickTab(tab) {
-        this.browserService.targetTabs = [tab._tab];
-        this.browserService.focusTab(tab._tab);
+    public async onDoubleClickTab(tab) {
+        await this.browserService.focusTab(tab._tab);
     }
 
-    public onDoubleClickWindow(window) {
-        this.browserService.targetWindows = [window._window];
-        this.browserService.forcusWindow(window._window);
+    public async onDoubleClickWindow(window) {
+        await this.browserService.focusWindow(window._window);
     }
 
-    public onFreshCurrentWindow(window){
+    public onFreshCurrentWindow(window) {
         this.browserService.reloadWindows([window]);
     }
 
-    async updateWindows() {
+    async updateWindows(isForceReset = false) {
+        if (isForceReset) {
+            this._allWindows = null;
+        }
         let previousWindows: Map<number, WindowModel> =
             this._allWindows &&
             new Map(_.map(this._allWindows, window => [window.id, window]));
         let allWindows = await this.browserService.getWindows();
         allWindows = _.map(<any>allWindows, window => {
             let wm = WindowModel.create(window);
-            if(previousWindows && previousWindows.has(window.id)){
+            if (previousWindows && previousWindows.has(window.id)) {
                 let pw = previousWindows.get(window.id);
                 wm.isSelected = pw.isSelected;
-                _.forEach(pw.tabs, (tabPre:TabModel) =>{
-                    let tab:TabModel = _.find(wm.tabs, tab=>tab.id === tabPre.id);
-                    if(tab){
+                _.forEach(pw.tabs, (tabPre: TabModel) => {
+                    let tab: TabModel = _.find(
+                        wm.tabs,
+                        tab => tab.id === tabPre.id
+                    );
+                    if (tab) {
                         tab.isSelected = tabPre.isSelected;
                         tab.isFilterOut = tab.isFilterOut;
                     }
@@ -246,15 +259,14 @@ export class TabListComponent implements OnInit, OnDestroy {
             return wm;
         });
 
-        if(this._allWindows){
-            _.remove(this._allWindows, ()=>true);
-        }
-        else{
+        if (this._allWindows) {
+            _.remove(this._allWindows, () => true);
+        } else {
             this._allWindows = [];
         }
-        _.forEach(<any>allWindows, window=>{
+        _.forEach(<any>allWindows, window => {
             this._allWindows.push(window);
-        })
+        });
         this.activeIds = [];
         for (let i = 0; i < this._allWindows.length; i++) {
             this.activeIds.push(`panel-${i}`);
@@ -263,7 +275,7 @@ export class TabListComponent implements OnInit, OnDestroy {
 
     async onSelectWindow(window) {
         window.isSelected = window.isSelected ? false : true;
-        if (this.browserService.targetTabs) {
+        if (this.browserService.targetWindows) {
             let targetIndex = _.findIndex(
                 this.browserService.targetWindows,
                 tt => tt.id === window.id
@@ -277,7 +289,7 @@ export class TabListComponent implements OnInit, OnDestroy {
                 }
             } else {
                 if (window.isSelected) {
-                    this.browserService.targetTabs.push(window._window);
+                    this.browserService.targetWindows.push(window._window);
                 }
             }
         } else {

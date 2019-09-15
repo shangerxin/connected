@@ -22,7 +22,7 @@ export class FilterService {
             if (tabs && filter) {
                 this.filterTabsResult = [];
                 filter = filter.toLowerCase();
-                _.forEach(tabs, tab => {
+                _.forEach(<any>tabs, tab => {
                     let url = tab.url && tab.url.toLowerCase();
                     let title = tab.title && tab.title.toLowerCase();
                     if (

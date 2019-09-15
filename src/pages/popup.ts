@@ -7,6 +7,7 @@ import { TabListComponent } from "../components/tabListComponent";
 import { ToolbarComponent } from "../components/toolbarComponent";
 import { FilterComponent } from "../components/filterComponent";
 import { BreadcrumbsComponent } from "../components/breadcrumbsComponent";
+import { TabComponent } from "../components/tabComponent";
 import { SessionListComponent } from "../components/sessionListComponent";
 import { InputSessionNameDialogComponent } from "../dialogs/saveSessionDialog";
 
@@ -20,14 +21,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
         ToolbarComponent,
         FilterComponent,
         InputSessionNameDialogComponent,
+        TabComponent,
         SessionListComponent
     ],
     exports: [],
-    bootstrap: [
-        TabListComponent,
-        ToolbarComponent,
-        FilterComponent
-    ]
+    bootstrap: [TabListComponent, ToolbarComponent, FilterComponent]
 })
-export class PopupModule {
-}
+export class PopupModule {}
