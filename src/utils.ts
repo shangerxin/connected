@@ -2,7 +2,7 @@ import { GlobalConst } from "./environments/globalConstTypes";
 
 export function getIconUrl(browserTab) {
     return browserTab.url &&
-        browserTab.url.startsWith(GlobalConst.extensionUrlPrefix)
+        browserTab.url.startsWith(GlobalConst.chromeUrlPrefix)
         ? "assets/images/chrome16.png"
         : browserTab.favIconUrl;
 }

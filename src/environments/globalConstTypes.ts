@@ -1,7 +1,7 @@
 export const GlobalConst = {
-    extensionUrlPrefix: "chrome:",
-	tabUpdateStatusComplete: "complete",
-	sessionIdPrefix:"session:",
+    chromeUrlPrefix: "chrome",
+    tabUpdateStatusComplete: "complete",
+    sessionIdPrefix: "session:",
     notFound: -1,
     crumbMaxLength: 10,
     success: 0,
@@ -26,31 +26,31 @@ export const Subjects = {
 };
 
 export const CommandTypes = {
-    toggleSessionList:"toggleSessionList",
-    donate:"donate",
-    options:"options",
-    togglePinTabs:"togglePinTabs",
-    closeTabs:"closeTabs",
-    undoCloseTabs:"undoCloseTabs",
-    refreshTabs:"refreshTabs",
-    refreshAllTabs:"refreshAllTabs",
-    multedAllTabs:"muteAllTabs",
-    openNewInWindow:"openNewInWindow",
-    moveToNewWindow:"moveToNewWindow",
+    toggleSessionList: "toggleSessionList",
+    donate: "donate",
+    options: "options",
+    togglePinTabs: "togglePinTabs",
+    closeTabs: "closeTabs",
+    undoCloseTabs: "undoCloseTabs",
+    refreshTabs: "refreshTabs",
+    refreshAllTabs: "refreshAllTabs",
+    multedAllTabs: "muteAllTabs",
+    openNewInWindow: "openNewInWindow",
+    moveToNewWindow: "moveToNewWindow"
 };
 
 export const WindowStates = {
-    maximized:"maximized",
-    normal:"normal",
-    minimized:"minimized",
-    fullscreen:"fullscreen"
+    maximized: "maximized",
+    normal: "normal",
+    minimized: "minimized",
+    fullscreen: "fullscreen"
 };
 
 export const WindowType = {
-    normal:"normal",
-    popup:"popup",
-    panel:"panel",
-    app:"app",
-    devtools:"devtools",
+    normal: "normal",
+    popup: "popup",
+    panel: "panel",
+    app: "app",
+    devtools: "devtools",
     allTypes: ["normal", "popup", "panel", "app", "devtools"]
 };

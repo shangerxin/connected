@@ -51,16 +51,15 @@ export class TabListComponent implements OnInit, OnDestroy {
             this._subscriptions.push(
                 this.browserService.tabChangedObservable.subscribe(
                     async info => {
+                        let data = info.data;
                         switch (info.type) {
                             case Subjects.tabs_onRemoved: {
                                 this._allWindows.updateWithCondition(
-                                    window => window.id === info.data.windowId,
+                                    window => window.id === data.windowId,
                                     window => {
                                         _.remove(
                                             window.tabs,
-                                            tab =>
-                                                (<any>tab).id ===
-                                                info.data.tabId
+                                            tab => (<any>tab).id === data.tabId
                                         );
                                     }
                                 );
@@ -70,57 +69,15 @@ export class TabListComponent implements OnInit, OnDestroy {
                                 );
                                 break;
                             }
-                            case Subjects.tabs_onUpdated: {
-                                let newTab = info.data.tab;
-                                if (this.allTabs && newTab) {
-                                    let windowModel = _.find(
-                                        this._allWindows,
-                                        window =>
-                                            (<any>window).id === newTab.windowId
+                            case Subjects.tabs_onCreated: {
+                                let curWindow = _.find(
+                                    this._allWindows,
+                                    window => window.id === data.tab.windowId
+                                );
+                                if (curWindow) {
+                                    curWindow.tabs.push(
+                                        TabModel.create(data.tab)
                                     );
-                                    if (windowModel) {
-                                        TabModel.assign(
-                                            _.find(
-                                                this.allTabs,
-                                                tab =>
-                                                    tab.id === info.data.tab.id
-                                            ),
-                                            info.data.tab
-                                        );
-                                        this.refresh();
-                                    } else {
-                                        let allWindows = await this.browserService.getWindows();
-                                        let browserWindow = _.find(
-                                            allWindows,
-                                            window =>
-                                                window.id === newTab.windowId
-                                        );
-                                        if (browserWindow) {
-                                            windowModel = WindowModel.create(
-                                                browserWindow
-                                            );
-                                            let tabModel = _.find(
-                                                windowModel.tabs,
-                                                tab =>
-                                                    (<any>tab).id === newTab.id
-                                            );
-                                            if (tabModel) {
-                                                this._allTabs.push(tabModel);
-                                            } else {
-                                                tabModel = TabModel.create(
-                                                    newTab
-                                                );
-                                                windowModel.tabs.push(tabModel);
-                                                windowModel.title = generateWindowTitle(
-                                                    windowModel
-                                                );
-                                                this._allTabs.push(tabModel);
-                                                this._allWindows.push(
-                                                    windowModel
-                                                );
-                                            }
-                                        }
-                                    }
                                 }
                                 break;
                             }
@@ -131,6 +88,7 @@ export class TabListComponent implements OnInit, OnDestroy {
 
             this._subscriptions.push(
                 this.browserService.windowChangedObservable.subscribe(info => {
+                    let data = info.data;
                     switch (info.type) {
                         case Subjects.windows_onRemoved: {
                             if (this._allWindows) {
@@ -138,7 +96,7 @@ export class TabListComponent implements OnInit, OnDestroy {
                                     this._allWindows,
                                     window =>
                                         (<WindowModel>window).id ===
-                                        info.data.windowId
+                                        data.windowId
                                 ).forEach(window => {
                                     _.pullAllWith(
                                         this._allTabs,
@@ -152,6 +110,12 @@ export class TabListComponent implements OnInit, OnDestroy {
                                     );
                                 });
                             }
+                            break;
+                        }
+                        case Subjects.windows_onCreated: {
+                            this._allWindows.push(
+                                WindowModel.create(data.window)
+                            );
                             break;
                         }
                     }

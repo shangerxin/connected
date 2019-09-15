@@ -17,23 +17,22 @@ export class ToolbarComponent implements OnInit {
     ) {}
     ngOnInit(): void {}
 
-    public onClickDonate(){
+    public async onClickDonate() {
         this.commandService.commandSubject.next({
             type: CommandTypes.donate,
             args: {}
         });
     }
 
-    public onClickTogglePinTabs() {
-        this.browserService.togglePinTabs().then(()=>{
-            this.commandService.commandSubject.next({
-                type: CommandTypes.togglePinTabs,
-                args: {}
-            });
+    public async onClickTogglePinTabs() {
+        this.commandService.commandSubject.next({
+            type: CommandTypes.togglePinTabs,
+            args: {}
         });
+        await this.browserService.togglePinTabs();
     }
 
-    public onClickCloseTabs() {
+    public async onClickCloseTabs() {
         this.browserService.closeTabs();
         this.commandService.commandSubject.next({
             type: CommandTypes.closeTabs,
@@ -41,7 +40,7 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
-    public onClickUndoCloseTabs() {
+    public async onClickUndoCloseTabs() {
         this.browserService.undoCloseTabs();
         this.commandService.commandSubject.next({
             type: CommandTypes.undoCloseTabs,
@@ -49,7 +48,7 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
-    public onClickRefreshTabs() {
+    public async onClickRefreshTabs() {
         this.browserService.reloadTabs();
         this.commandService.commandSubject.next({
             type: CommandTypes.refreshTabs,
@@ -57,7 +56,7 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
-    public onClickRefreshAllTab() {
+    public async onClickRefreshAllTab() {
         this.browserService.reloadAllTabs();
         this.commandService.commandSubject.next({
             type: CommandTypes.refreshAllTabs,
@@ -65,14 +64,14 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
-    public onClickOptions() {
+    public async onClickOptions() {
         this.commandService.commandSubject.next({
             type: CommandTypes.options,
             args: {}
         });
     }
 
-    public onClickMutedAll() {
+    public async onClickMutedAll() {
         this.browserService.toggleMutedAllTabs();
         this.commandService.commandSubject.next({
             type: CommandTypes.multedAllTabs,
@@ -80,7 +79,7 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
-    public onClickOpenInNewWindow() {
+    public async onClickOpenInNewWindow() {
         this.browserService.openInNewWindow();
         this.commandService.commandSubject.next({
             type: CommandTypes.openNewInWindow,
@@ -88,7 +87,7 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
-    public onClickMoveToNewWindow(){
+    public async onClickMoveToNewWindow() {
         this.browserService.moveToNewWindow();
         this.commandService.commandSubject.next({
             type: CommandTypes.moveToNewWindow,
@@ -96,7 +95,7 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
-    public onClickToggleSessionList() {
+    public async onClickToggleSessionList() {
         this.isDisplaySessionList = !this.isDisplaySessionList;
         this.commandService.commandSubject.next({
             type: CommandTypes.toggleSessionList,

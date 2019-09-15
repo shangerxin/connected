@@ -18,6 +18,7 @@ import {
 import { Observable, Subscription } from "rxjs";
 import { TabModel } from "../models/tabModel";
 import { CommandService } from "../services/commandService";
+import { tsThisType } from "@babel/types";
 
 @Component({
     selector: "ng-tab",
@@ -34,16 +35,12 @@ export class TabComponent implements OnInit, OnDestroy {
             this.commandService.commandObservable.subscribe(async info => {
                 switch (info.type) {
                     case CommandTypes.multedAllTabs: {
-                        this.tabModel._tab.mutedInfo.muted = !this.tabModel
-                            .muted;
                         this.tabModel.muted = !this.tabModel.muted;
                         break;
                     }
                     case CommandTypes.togglePinTabs: {
                         _.forEach(this.browserService.targetTabs, tab => {
                             if (tab.id === this.tabModel.id) {
-                                this.tabModel._tab.pinned = !this.tabModel
-                                    .pinned;
                                 this.tabModel.pinned = !this.tabModel.pinned;
                             }
                         });
@@ -54,7 +51,21 @@ export class TabComponent implements OnInit, OnDestroy {
         );
 
         this._subscriptions.push(
-            this.browserService.tabChangedObservable.subscribe(async info => {})
+            this.browserService.tabChangedObservable.subscribe(async info => {
+                switch (info.type) {
+                    case Subjects.tabs_onUpdated: {
+                        let data = info.data;
+                        let changeInfo = data.changeInfo;
+                        let tab = data.tab;
+                        if (tab && changeInfo) {
+                            if (this.tabModel.id === tab.id) {
+                                TabModel.assign(this.tabModel, tab);
+                            }
+                        }
+                        break;
+                    }
+                }
+            })
         );
     }
 

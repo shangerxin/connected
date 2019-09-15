@@ -116,12 +116,15 @@ export class BrowserService implements OnDestroy {
 
     async togglePinTabs(tabs = this.targetTabs) {
         if (tabs) {
-            let isAllPinned = _.reduce(
-                tabs,
-                (r, tab) => tab.pinned === true && r === true,
+            return Promise.sequenceHandleAll(
+                _.map(tabs, tab => tab.id),
+                (tabId, callback, result) => {
+                    chrome.tabs.get(tabId, tab => {
+                        callback(tab.pinned === true && result === true);
+                    });
+                },
                 true
-            );
-            return Promise.all(
+            ).then(isAllPinned => {
                 _.map(tabs, tab => {
                     return new Promise(res => {
                         chrome.tabs.update(
@@ -132,8 +135,8 @@ export class BrowserService implements OnDestroy {
                             }
                         );
                     });
-                })
-            );
+                });
+            });
         }
     }
 
