@@ -1,44 +1,44 @@
 # Introduction
+
 This project Connected is main to accelerate the personal daily productivity.
 It included personal workspace management and tab management etc.
 
 # Features
 
 # Setup
-- prequirement
-nodejs
-chrome
 
-- install node packages
-$ npm install -D webpack
+-   prequirement
+    nodejs
+    chrome
+
+-   install node packages
+    $ npm install -D webpack
 $ npm install -D typescript ts-loader
 
-- install node library and typescript type information
-$ npm install --save-dev lodash
+-   install node library and typescript type information
+    $ npm install --save-dev lodash
 $ npm install --save-dev @types/lodash
 
-- build the project
-$ npm run-script build
+-   build the project
+    \$ npm run-script build
 
 # TODO
-- []fix status sync bug
-- [x]delete session item will not resume the filted list
-- [x]refresh all tabs for current window
-- add right click
-	+ move to new window
-	+ unselect all
-	+ close
-- add session create time and last access time and modify the table sequence
-- []add export and import sessions
-- []add help document
-- []filter hit enter twice to select all filtered tabs
-- add remove duplicate tabs, the trail '/' should be ignore
-- merge refresh tabs with refresh all
-- []add donate buttons
-- []add extension description page in home page
-- write a simple article about browser extension
-- []optimize and minify packaged code
-- []add option page
-- []publish extension
-- add l18n support
-- add test cases
+
+-   [x]fix status sync bug
+-   [x]delete session item will not resume the filted list
+-   [x]refresh all tabs for current window
+-   add right click + move to new window + unselect all + close
+-   add session create time and last access time and modify the table sequence
+-   []add export and import sessions
+-   []add help document
+-   []filter hit enter twice to select all filtered tabs
+-   add remove duplicate tabs, the trail '/' should be ignore
+-   merge refresh tabs with refresh all
+-   []add donate buttons
+-   []add extension description page in home page
+-   write a simple article about browser extension
+-   []optimize and minify packaged code
+-   []add option page
+-   []publish extension
+-   add l18n support
+-   add test cases
