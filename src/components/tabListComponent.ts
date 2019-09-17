@@ -197,16 +197,13 @@ export class TabListComponent implements OnInit, OnDestroy {
     }
 
     async updateWindows(isForceReset = false) {
-        if (isForceReset) {
-            this._allWindows = null;
-        }
         let previousWindows: Map<number, WindowModel> =
-            this._allWindows &&
+            (this._allWindows && !isForceReset) &&
             new Map(_.map(this._allWindows, window => [window.id, window]));
         let allWindows = await this.browserService.getWindows();
         allWindows = _.map(<any>allWindows, window => {
             let wm = WindowModel.create(window);
-            if (previousWindows && previousWindows.has(window.id)) {
+            if (!isForceReset && previousWindows && previousWindows.has(window.id)) {
                 let pw = previousWindows.get(window.id);
                 wm.isSelected = pw.isSelected;
                 _.forEach(pw.tabs, (tabPre: TabModel) => {
@@ -215,8 +212,7 @@ export class TabListComponent implements OnInit, OnDestroy {
                         tab => tab.id === tabPre.id
                     );
                     if (tab) {
-                        tab.isSelected = tabPre.isSelected;
-                        tab.isFilterOut = tab.isFilterOut;
+                        TabModel.extend(tab, tabPre);
                     }
                 });
             }
@@ -269,7 +265,7 @@ export class TabListComponent implements OnInit, OnDestroy {
             sessionInfo.description
         );
         session.tabs = _.map(window.tabs, tab => {
-            return { url: tab.url };
+            return { url: tab.url, pinned:tab.pinned };
         });
         this.browserService.saveSession(session);
     }
