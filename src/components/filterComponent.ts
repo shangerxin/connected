@@ -23,9 +23,7 @@ export class FilterComponent implements OnInit {
 
     public onKey(value: string) {
 		if(value){
-			if(value.length > 2){
-                this.filterService.search(this.filter);
-			}
+            this.filterService.search(this.filter);
 		}
 		else{
 			this.filterService.reset();
