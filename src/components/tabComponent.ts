@@ -94,6 +94,10 @@ export class TabComponent implements OnInit, OnDestroy {
     }
 
     onDoubleClickTab() {
+        this.commandService.commandSubject.next({
+            type:CommandTypes.focusTab,
+            args:{}
+        });
         this.doubleClickedEvent.emit(this.tab);
     }
 }

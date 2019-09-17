@@ -1,9 +1,8 @@
 import * as _ from "lodash";
-import "../extends/extendPromise";
 import * as localforage from "localforage";
 
 import { Injectable } from "@angular/core";
-import { GlobalConst } from "src/environments/globalConstTypes";
+import "../extends/extendPromise";
 
 @Injectable({
     providedIn: "root"

@@ -7,7 +7,7 @@ export function getIconUrl(browserTab) {
         : browserTab.favIconUrl;
 }
 
-export function getWindowTitle(browserWindow) {
+export function generateWindowTitle(browserWindow) {
     if (browserWindow.tabs) {
         let title = browserWindow.tabs[0].title
             ? browserWindow.tabs[0].title
@@ -20,4 +20,13 @@ export function getWindowTitle(browserWindow) {
     } else {
         return "";
     }
+}
+
+export function generateTextContentUrl(content){
+    let blob = new Blob([JSON.stringify(content)], {type: "text/plain"});
+    return URL.createObjectURL(blob);
+}
+
+export function getZipContentUrl(content){
+
 }

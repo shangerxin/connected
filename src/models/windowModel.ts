@@ -1,6 +1,6 @@
 import * as _ from "lodash";
 import { TabModel } from "./tabModel";
-import { getWindowTitle } from "../utils";
+import { generateWindowTitle } from "../utils";
 
 function createTabModels(browserWindow) {
     if (browserWindow.tabs) {
@@ -21,7 +21,7 @@ export class WindowModel {
         return <WindowModel>{
             id: browserWindow.id,
             _window: browserWindow,
-            title: getWindowTitle(browserWindow),
+            title: generateWindowTitle(browserWindow),
             tabs: createTabModels(browserWindow),
             isSelected: false,
             isFocused: browserWindow.focused
@@ -31,7 +31,7 @@ export class WindowModel {
     static assign(windowModel: WindowModel, browserWindow) {
         if (windowModel.id === browserWindow.id) {
             windowModel._window = browserWindow;
-            windowModel.title = getWindowTitle(browserWindow);
+            windowModel.title = generateWindowTitle(browserWindow);
             windowModel.tabs = createTabModels(browserWindow);
             windowModel.isFocused = browserWindow.focused;
         }

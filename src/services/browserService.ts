@@ -1,6 +1,5 @@
+import { Injectable, OnDestroy, OnInit } from "@angular/core";
 import * as _ from "lodash";
-
-import { Injectable, OnDestroy } from "@angular/core";
 import "../extends/extendPromise";
 import {
     DBBrowserKeys,
@@ -15,7 +14,9 @@ import { Subject, Observable } from "rxjs";
 @Injectable({
     providedIn: "root"
 })
-export class BrowserService implements OnDestroy {
+export class BrowserService implements OnInit, OnDestroy {
+    //TODO:Check targetTabs states are not sync with view model. Using the tabId
+    //is safe. Check this issue in the future.
     targetTabs: Array<any>;
     targetWindows: Array<any>;
 
@@ -43,6 +44,8 @@ export class BrowserService implements OnDestroy {
         this._browserListeners = new Map<string, Function>();
         this.startMonitorBrowser();
     }
+
+    ngOnInit(): void {}
 
     ngOnDestroy(): void {
         this.stopMonitorBrowser();
@@ -84,7 +87,7 @@ export class BrowserService implements OnDestroy {
         });
     }
 
-    async getCurrentTab() {
+    public async getCurrentTab() {
         return new Promise(res => {
             chrome.tabs.getCurrent(tab => {
                 res(tab);
@@ -92,7 +95,7 @@ export class BrowserService implements OnDestroy {
         });
     }
 
-    async createTab(window) {
+    public async createTab(window) {
         if (window) {
             return new Promise((res, rej) => {
                 chrome.tabs.create(
@@ -114,7 +117,7 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async togglePinTabs(tabs = this.targetTabs) {
+    public async togglePinTabs(tabs = this.targetTabs) {
         if (tabs) {
             return Promise.sequenceHandleAll(
                 _.map(tabs, tab => tab.id),
@@ -140,7 +143,7 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async closeTabs(tabs = this.targetTabs) {
+    public async closeTabs(tabs = this.targetTabs) {
         if (tabs) {
             this.previousClosedTabsInfo = _.map(tabs, tab => {
                 return { url: tab.url, windowId: tab.windowId };
@@ -157,7 +160,7 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async reloadTabs(tabs = this.targetTabs) {
+    public async reloadTabs(tabs = this.targetTabs) {
         if (tabs) {
             return Promise.all(
                 _.map(tabs, tab => {
@@ -175,7 +178,7 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async reloadAllTabs() {
+    public async reloadAllTabs() {
         return this.getAllTabs().then(tabs => {
             return new Promise(res => {
                 _.forEach(<any>tabs, tab => {
@@ -187,7 +190,7 @@ export class BrowserService implements OnDestroy {
         });
     }
 
-    async toggleMutedAllTabs() {
+    public async toggleMutedAllTabs() {
         return this.getAllTabs().then(tabs => {
             return new Promise(res => {
                 let isAllMuted = _.reduce(
@@ -204,7 +207,7 @@ export class BrowserService implements OnDestroy {
         });
     }
 
-    async focusTab(tab = null) {
+    public async focusTab(tab = null) {
         tab =
             tab ||
             (this.targetTabs &&
@@ -222,11 +225,11 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async takeSnapshortForTabs() {}
+    public async takeSnapshortForTabs() {}
 
-    async zoom(tab, factor) {}
+    public async zoom(tab, factor) {}
 
-    async undoCloseTabs() {
+    public async undoCloseTabs() {
         if (this.previousClosedTabsInfo) {
             let windowInfo: any = {};
             return Promise.sequenceHandleAll(
@@ -273,7 +276,7 @@ export class BrowserService implements OnDestroy {
     }
 
     //Window realtive
-    async getWindows(): Promise<Array<any>> {
+    public async getWindows(): Promise<Array<any>> {
         return new Promise(res => {
             chrome.windows.getAll(
                 {
@@ -285,7 +288,7 @@ export class BrowserService implements OnDestroy {
         });
     }
 
-    async getCurrentWindow() {
+    public async getCurrentWindow() {
         return new Promise(res => {
             chrome.windows.getCurrent(window => {
                 res(window);
@@ -293,39 +296,39 @@ export class BrowserService implements OnDestroy {
         });
     }
 
-    async createWindow() {
+    public async createWindow() {
         return this.openNewMaxmizedWindow();
     }
 
-    async getAllSessions() {
+    public async getAllSessions() {
         return this.persistentService.getAllValues((v, k: string) => {
             return k && k.startsWith(GlobalConst.sessionIdPrefix);
         });
     }
 
-    async updateSessionList() {
+    public async updateSessionList() {
         return this.getAllSessions().then(sessions => {
             this.sessionChangedSubject.next(sessions);
         });
     }
 
-    async restoreSession(session) {
+    public async restoreSession(session) {
         return this.openInNewWindow(session.tabs);
     }
 
-    async deleteSession(session) {
+    public async deleteSession(session) {
         await this.persistentService.delete(session.id);
         return this.updateSessionList();
     }
 
-    async saveSession(session) {
+    public async saveSession(session) {
         if (session) {
             await this.persistentService.save(session.id, session);
             return this.updateSessionList();
         }
     }
 
-    async closeWindows(windows = this.targetWindows) {
+    public async closeWindows(windows = this.targetWindows) {
         if (windows) {
             let closedTabs = [];
             return Promise.all(
@@ -349,7 +352,7 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async focusWindow(window = null) {
+    public async focusWindow(window = null) {
         window =
             window ||
             (this.targetWindows &&
@@ -364,7 +367,7 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async reloadWindows(windows = this.targetWindows) {
+    public async reloadWindows(windows = this.targetWindows) {
         if (windows) {
             let tabs = [];
             _.forEach(windows, window => {
@@ -376,7 +379,7 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async openInNewWindow(tabs = this.targetTabs) {
+    public async openInNewWindow(tabs = this.targetTabs) {
         if (tabs) {
             return new Promise((res, rej) => {
                 this.openNewMaxmizedWindow().then(window => {
@@ -385,7 +388,7 @@ export class BrowserService implements OnDestroy {
                         if (isFirst) {
                             chrome.tabs.update(
                                 (<any>window).tabs[0].id,
-                                { url: tab.url },
+                                { url: tab.url, pinned: !!tab.pinned },
                                 () => {
                                     isFirst = false;
                                     callback();
@@ -393,7 +396,11 @@ export class BrowserService implements OnDestroy {
                             );
                         } else {
                             chrome.tabs.create(
-                                { url: tab.url, windowId: (<any>window).id },
+                                {
+                                    url: tab.url,
+                                    windowId: (<any>window).id,
+                                    pinned: !!tab.pinned
+                                },
                                 () => {
                                     callback();
                                 }
@@ -407,7 +414,7 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async moveToNewWindow(tabs = this.targetTabs) {
+    public async moveToNewWindow(tabs = this.targetTabs) {
         if (tabs) {
             return new Promise((res, rej) => {
                 this.openNewMaxmizedWindow().then(window => {
@@ -432,12 +439,25 @@ export class BrowserService implements OnDestroy {
         }
     }
 
-    async clearAllTargets() {
+    public async download(url, filename) {
+        return new Promise(res => {
+            chrome.downloads.download(
+                {
+                    url,
+                    filename,
+                    saveAs: true
+                },
+                () => res()
+            );
+        });
+    }
+
+    public async clearAllTargets() {
         this.targetTabs = null;
         this.targetWindows = null;
     }
 
-    async clearAll() {
+    public async clearAll() {
         await this.clearAllTargets();
     }
 

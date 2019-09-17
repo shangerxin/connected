@@ -1,14 +1,7 @@
-import * as _ from "lodash";
-
 import { Injectable, OnDestroy, OnInit } from "@angular/core";
-import "../extends/extendPromise";
-import {
-    DBBrowserKeys,
-    GlobalConst,
-    Subjects
-} from "../environments/globalConstTypes";
-import { PersistentService } from "../services/persistentService";
 import { Subject, Observable } from "rxjs";
+import * as _ from "lodash";
+import "../extends/extendPromise";
 
 @Injectable({
     providedIn: "root"

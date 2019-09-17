@@ -14,7 +14,7 @@ import { TabModel } from "../models/tabModel";
 import { WindowModel } from "../models/windowModel";
 import { SessionModel } from "../models/sessionModel";
 import { CommandService } from "../services/commandService";
-import { getWindowTitle as generateWindowTitle } from "../utils";
+import { StatisticService } from "../services/statisticService";
 
 @Component({
     selector: "ng-tab-list",
@@ -28,7 +28,8 @@ export class TabListComponent implements OnInit, OnDestroy {
     constructor(
         private browserService: BrowserService,
         private filterService: FilterService,
-        private commandService: CommandService
+        private commandService: CommandService,
+        private statisticService:StatisticService
     ) {
         this._subscriptions = [];
     }
@@ -148,10 +149,12 @@ export class TabListComponent implements OnInit, OnDestroy {
                 })
             );
         });
+        this.statisticService.startMonitor();
     }
 
     ngOnDestroy(): void {
         _.forEach(this._subscriptions, sub => sub.unsubscribe());
+        this.statisticService.stopMonitor();
     }
 
     private _allWindows;
@@ -189,21 +192,34 @@ export class TabListComponent implements OnInit, OnDestroy {
     }
 
     public async onDoubleClickWindow(window) {
+        this.commandService.commandSubject.next({
+            type:CommandTypes.focusWindow,
+            args:{}
+        });
         await this.browserService.focusWindow(window._window);
     }
 
     public onFreshCurrentWindow(window) {
+        this.commandService.commandSubject.next({
+            type:CommandTypes.refreshWindow,
+            args:{}
+        });
         this.browserService.reloadWindows([window]);
     }
 
     async updateWindows(isForceReset = false) {
         let previousWindows: Map<number, WindowModel> =
-            (this._allWindows && !isForceReset) &&
+            this._allWindows &&
+            !isForceReset &&
             new Map(_.map(this._allWindows, window => [window.id, window]));
         let allWindows = await this.browserService.getWindows();
         allWindows = _.map(<any>allWindows, window => {
             let wm = WindowModel.create(window);
-            if (!isForceReset && previousWindows && previousWindows.has(window.id)) {
+            if (
+                !isForceReset &&
+                previousWindows &&
+                previousWindows.has(window.id)
+            ) {
                 let pw = previousWindows.get(window.id);
                 wm.isSelected = pw.isSelected;
                 _.forEach(pw.tabs, (tabPre: TabModel) => {
@@ -260,17 +276,25 @@ export class TabListComponent implements OnInit, OnDestroy {
     }
 
     async onClickSaveSession(sessionInfo, window) {
+        this.commandService.commandSubject.next({
+            type:CommandTypes.saveSession,
+            args:{}
+        });
         let session = SessionModel.create(
             sessionInfo.name,
             sessionInfo.description
         );
         session.tabs = _.map(window.tabs, tab => {
-            return { url: tab.url, pinned:tab.pinned };
+            return { url: tab.url, pinned: tab.pinned, windowId: tab.windowId };
         });
         this.browserService.saveSession(session);
     }
 
     async onClickCloseWindow(window) {
+        this.commandService.commandSubject.next({
+            type:CommandTypes.closeWindow,
+            args:{}
+        });
         let targetWindows = [window._window];
         _.remove(this._allWindows, w => (<any>w).id === window.id);
         this.browserService.closeWindows(targetWindows);

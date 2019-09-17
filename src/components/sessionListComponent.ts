@@ -1,12 +1,13 @@
 import * as _ from "lodash";
 import { OnInit, Component, Input, OnDestroy } from "@angular/core";
 import { BrowserService } from "../services/browserService";
-import { CommunicatorService } from "../services/communicatorService";
 import { FilterService } from "../services/filterService";
 import { SessionModel } from "../models/sessionModel";
-import { GlobalConst } from "../environments/globalConstTypes";
+import { GlobalConst, CommandTypes } from "../environments/globalConstTypes";
 import { Observable } from "rxjs";
+import {generateTextContentUrl} from "../utils";
 import "../extends/extendArray";
+import { CommandService } from "../services/commandService";
 
 @Component({
     selector: "ng-session-list",
@@ -18,12 +19,14 @@ export class SessionListComponent implements OnInit, OnDestroy {
     private _filter;
     public get sessions(): Observable<Array<any>>{
 		return this._session;
-	}
+    }
+    public downloadSessionUrl;
+    public downloadSessionZipUrl;
     protected _allSessions;
     private _subscriptions = [];
     constructor(
         private browserService: BrowserService,
-        private communicationService: CommunicatorService,
+        private commandService:CommandService,
         private filterService: FilterService
     ) {
         this.browserService.getAllSessions().then(v => (this._session = v));
@@ -52,15 +55,31 @@ export class SessionListComponent implements OnInit, OnDestroy {
         _.forEach(this._subscriptions, sub => sub.unsubscribe());
     }
 
-    onClickRestoreSession(session) {
+    public async onClickRestoreSession(session) {
+        this.commandService.commandSubject.next({
+            type:CommandTypes.restoreSession,
+            args:{}
+        });
         this.browserService.restoreSession(session);
     }
 
-    onClickExportSession(session) {
-        this.communicationService.getSessionUrl(session);
+    public async onClickExportSession(session) {
     }
 
-    onClickDeleteSession(session) {
+    public async onClickDownloadSessionAsJSON(session){
+        this.commandService.commandSubject.next({
+            type:CommandTypes.downloadSessionAsJSON,
+            args:{}
+        });
+        this.downloadSessionUrl = generateTextContentUrl(session);
+        this.browserService.download(this.downloadSessionUrl, `${session.name}.json`);
+    }
+
+    public async onClickDeleteSession(session) {
+        this.commandService.commandSubject.next({
+            type:CommandTypes.deleteSession,
+            args:{}
+        });
         this.browserService.deleteSession(session).then(() => {
             _.remove(this._session, s => (<any>s).id === session.id);
             _.remove(this._allSessions, s=>(<any>s).id === session.id);
@@ -72,7 +91,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         if(!filter){
             return;
         }
-        
+
         _.remove(
             this._session,
             (session: SessionModel) =>

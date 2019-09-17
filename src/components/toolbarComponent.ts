@@ -3,6 +3,8 @@ import { OnInit, Component, Output, EventEmitter } from "@angular/core";
 import { BrowserService } from "../services/browserService";
 import { CommandService } from "../services/commandService";
 import { GlobalConst, CommandTypes } from "../environments/globalConstTypes";
+import * as _ from "lodash";
+import { PersistentService } from "src/services/persistentService";
 
 @Component({
     selector: "ng-toolbar",
@@ -102,5 +104,26 @@ export class ToolbarComponent implements OnInit {
             args: { isDisplaySessionList: this.isDisplaySessionList }
         });
         this.browserService.updateSessionList();
+    }
+
+    public async onClickImportSession(uploadSessionFile){
+        if(!uploadSessionFile.changedListener){
+            uploadSessionFile.changedListener = (evt)=>{
+                let files = evt.target.files;
+                _.forEach(files, file=>{
+                    let reader = new FileReader();
+                    reader.onload = ()=>{
+                        try{
+                            let session = JSON.parse(<string>reader.result);
+                            this.browserService.saveSession(session);
+                        }
+                        catch{}
+                    };
+                    reader.readAsText(file);
+                });
+            };
+            uploadSessionFile.addEventListener("change", uploadSessionFile.changedListener);
+        }
+        uploadSessionFile.click();
     }
 }

@@ -15,11 +15,11 @@
 	</thead>
 	<tbody>
 		<tr *ngFor="let session of sessions; index as i">
-			<th scope="row">{{ i + 1 }}</th>
-			<td>
+			<th class="align-middle" scope="row">{{ i + 1 }}</th>
+			<td class="align-middle">
 				{{ session.name }}
 			</td>
-			<td>
+			<td class="align-middle">
 				<button class="btn btn-link"
 					[disabled]="!session.description"
 					ngbTooltip="{{session.description}}">
@@ -27,17 +27,28 @@
 						 src="assets/images/notes32.png"/>
 				</button>
 			</td>
-			<td>
-				<span ngbTooltip="Number of Tabs">{{ session.tabs.length }}</span>
+			<td class="align-middle">
+				<span
+					ngbTooltip="Number of Tabs">{{ session.tabs.length }}
+				</span>
 			</td>
-			<td>
-				<button class="btn btn-link"
-						ngbTooltip="Share Session"
-						(click)="onClickExportSession(session)">
-					<img class="button-icon"
-						 src="assets/images/share32.png" />
-				</button></td>
-			<td>
+			<td class="align-middle">
+				<div ngbDropdown>
+					<button class="btn btn-link"
+							ngbDropdownToggle
+							ngbTooltip="Share Session"
+							(click)="onClickExportSession(session)">
+						<img class="button-icon"
+							 src="assets/images/share32.png" />
+						<div ngbDropdownMenu>
+							<button ngbDropdownItem (click)="onClickDownloadSessionAsJSON(session)">
+								Download Session File
+							</button>
+						</div>
+					</button>
+				</div>
+			</td>
+			<td class="align-middle">
 				<button class="btn btn-link"
 						ngbTooltip="Restore Session"
 						(click)="onClickRestoreSession(session)">
@@ -45,7 +56,7 @@
 						src="assets/images/open32.png"/>
 				</button>
 			</td>
-			<td>
+			<td class="align-middle">
 				<button class="btn btn-link"
 						ngbTooltip="Delete Session"
 						(click)="onClickDeleteSession(session)">

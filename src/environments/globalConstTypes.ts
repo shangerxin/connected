@@ -8,11 +8,13 @@ export const GlobalConst = {
     failed: -1,
     pass: 0,
     failure: -1,
-    maxWindowTitleLength: 50
+    maxWindowTitleLength: 50,
+    maxRecordStatisticCount: 2,
 };
 
 export const DBBrowserKeys = {
-    previousClosedTabsInfo: "previousClosedTabsInfo"
+    previousClosedTabsInfo: "previousClosedTabsInfo",
+    commandStatisticInfo:"commandStatisticInfo",
 };
 
 export const Subjects = {
@@ -26,17 +28,27 @@ export const Subjects = {
 };
 
 export const CommandTypes = {
-    toggleSessionList: "toggleSessionList",
-    donate: "donate",
-    options: "options",
-    togglePinTabs: "togglePinTabs",
     closeTabs: "closeTabs",
-    undoCloseTabs: "undoCloseTabs",
-    refreshTabs: "refreshTabs",
-    refreshAllTabs: "refreshAllTabs",
+    closeWindow:"closeWindow",
+    clearFilter:"clearFilter",
+    deleteSession:"deleteSession",
+    donate: "donate",
+    downloadSessionAsJSON: "downloadSessionAsJSON",
+    focusTab:"focusTab",
+    focusWindow:"focusWindow",
+    moveToNewWindow: "moveToNewWindow",
     multedAllTabs: "muteAllTabs",
+    importSession:"importSession",
     openNewInWindow: "openNewInWindow",
-    moveToNewWindow: "moveToNewWindow"
+    options: "options",
+    refreshTabs: "refreshTabs",
+    refreshWindow:"refreshWindow",
+    refreshAllTabs: "refreshAllTabs",
+    restoreSession:"restoreSession",
+    saveSession:"saveSession",
+    togglePinTabs: "togglePinTabs",
+    toggleSessionList: "toggleSessionList",
+    undoCloseTabs: "undoCloseTabs",
 };
 
 export const WindowStates = {
@@ -54,3 +66,4 @@ export const WindowType = {
     devtools: "devtools",
     allTypes: ["normal", "popup", "panel", "app", "devtools"]
 };
+

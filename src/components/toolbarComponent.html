@@ -1,14 +1,15 @@
 <span class="row justify-content-end" style="margin: 5px">
-	<button type="button"
+	<a type="button"
 			ngbTooltip="Buy me a coffee. :)"
 			class="btn btn-outline-secondary"
+			href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=SDPLY5RM6H2HW&currency_code=USD&amount=5&source=url"
 			(click)="onClickDonate()">
 			<img class="button-icon" src="assets/images/coffee32.png"/>
-	</button>
+	</a>
 	<button type="button"
 			ngbTooltip="Pin Tab"
 			class="btn btn-outline-secondary"
-			[disabled]="isDisplaySessionList"
+			*ngIf="!isDisplaySessionList"
 			(click)="onClickTogglePinTabs()">
 		<img class="button-icon" src="assets/images/pin32.png"/>
 	</button>
@@ -16,7 +17,7 @@
 		<button type="button"
 				ngbTooltip="Refresh"
 				class="btn btn-outline-secondary dropdown-toggle"
-				[disabled]="isDisplaySessionList"
+				*ngIf="!isDisplaySessionList"
 				ngbDropdownToggle
 				id="dropdownRefreshTabs">
 			<img class="dropdown-button-icon" src="assets/images/refresh32.png"/>
@@ -29,7 +30,7 @@
 	<button type="button"
 		ngbTooltip="Undo"
 		class="btn btn-outline-secondary"
-		[disabled]="isDisplaySessionList"
+		*ngIf="!isDisplaySessionList"
 		(click)="onClickUndoCloseTabs()">
 		<img class="button-icon" src="assets/images/undo32.png"/>
 	</button>
@@ -37,7 +38,7 @@
 		<button type="button"
 			ngbTooltip="Open Tabs"
 			class="btn btn-outline-secondary dropdown-toggle"
-			[disabled]="isDisplaySessionList"
+			*ngIf="!isDisplaySessionList"
 			ngbDropdownToggle
 			id="dropdownOpenInNewWindow">
 			<img class="dropdown-button-icon" src="assets/images/newwindow32.png"/>
@@ -50,9 +51,23 @@
 	<button type="button"
 			ngbTooltip="Mute All Tabs"
 			class="btn btn-outline-secondary"
-			[disabled]="isDisplaySessionList"
+			*ngIf="!isDisplaySessionList"
 			(click)="onClickMutedAll()">
 			<img class="button-icon" src="assets/images/muted32.png"/>
+	</button>
+	<button type="button"
+			ngbTooltip="Import Session"
+			class="btn btn-outline-secondary"
+			*ngIf="isDisplaySessionList"
+			(click)="onClickImportSession(uploadSessionFile)">
+			<img class="button-icon" src="assets/images/import32.png"/>
+	</button>
+	<button type="button"
+			ngbTooltip="Close Tabs"
+			class="btn btn-outline-secondary"
+			*ngIf="!isDisplaySessionList"
+			(click)="onClickCloseTabs()">
+			<img class="button-icon" src="assets/images/close32.png"/>
 	</button>
 	<button type="button"
 			ngbTooltip="Toggle Session List"
@@ -63,17 +78,11 @@
 			<img class="button-icon" src="assets/images/savesession32.png"/>
 	</button>
 	<button type="button"
-			ngbTooltip="Close Tabs"
-			class="btn btn-outline-secondary"
-			[disabled]="isDisplaySessionList"
-			(click)="onClickCloseTabs()">
-			<img class="button-icon" src="assets/images/close32.png"/>
-	</button>
-
-	<button type="button"
 			ngbTooltip="Options"
 			class="btn btn-outline-secondary"
+			*ngIf="false"
 			(click)="onClickOptions()">
 			<img class="button-icon" src="assets/images/option32.png"/>
 	</button>
 </span>
+<input #uploadSessionFile accept=".json" type="file" style="display: none" multiple/>

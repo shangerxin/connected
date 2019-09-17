@@ -48,7 +48,8 @@
 		"storage",
 		"topSites",
 		"webNavigation",
-		"webRequest"
+		"webRequest",
+		"downloads"
 	],
 	"version":"0.0.1",
 	"web_accessible_resources":["assets/images/*.png"]

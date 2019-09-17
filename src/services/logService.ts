@@ -1,9 +1,8 @@
-import * as _ from 'lodash';
+import * as _ from "lodash";
 
 import { Injectable } from "@angular/core";
 
 @Injectable({
     providedIn: "root"
 })
-export class LogService {
-}
+export class LogService {}

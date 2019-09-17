@@ -6,12 +6,16 @@ export class SessionModel {
     name;
     description;
     tabs;
+    lastAccessDate;
+    createDate;
     static create(name, description) {
         return <SessionModel>{
             id: `${GlobalConst.sessionIdPrefix}${uuid()}`,
             name: name ? name : "",
             description: description ? description : "",
-            tabs: []
+            tabs: [],
+            createDate: Date.now(),
+            lastAccessDate: Date.now(),
         };
     }
 }
