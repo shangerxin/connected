@@ -109,6 +109,7 @@ export class ToolbarComponent implements OnInit {
                         try{
                             let session = JSON.parse(<string>reader.result);
                             this.browserService.saveSession(session);
+                            uploadSessionFile.value = "";
                         }
                         catch{}
                     };

@@ -147,9 +147,11 @@ export class TabListComponent implements OnInit, OnDestroy {
                             command.args.isDisplaySessionList;
                     }
                     else if(command.type === CommandTypes.selectAllTabs){
-                        _.forEach(this.allTabs, (tab:TabModel)=>{
+                        let allTabs = this.allTabs;
+                        _.forEach(allTabs, (tab:TabModel)=>{
                             tab.isSelected = true;
                         });
+                        this.browserService.targetTabs = allTabs;
                     }
                 })
             );

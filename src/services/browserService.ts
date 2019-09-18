@@ -215,9 +215,9 @@ export class BrowserService implements OnInit, OnDestroy {
                 this.targetTabs[0]);
         if (tab) {
             return new Promise(res => {
-                chrome.windows.get(tab.windowId, async window => {
-                    await this.focusWindow(window);
-                    chrome.tabs.update(tab.id, { active: true }, () => {
+                chrome.tabs.update(tab.id, { active: true }, () => {
+                    chrome.windows.get(tab.windowId, async window => {
+                        await this.focusWindow(window);
                         res();
                     });
                 });
