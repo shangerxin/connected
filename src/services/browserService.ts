@@ -229,7 +229,7 @@ export class BrowserService implements OnInit, OnDestroy {
 
     public async zoom(tab, factor) {}
 
-    public async undoCloseTabs() {
+    public async reopenClosedTabs() {
         if (this.previousClosedTabsInfo) {
             let windowInfo: any = {};
             return Promise.sequenceHandleAll(
@@ -313,7 +313,7 @@ export class BrowserService implements OnInit, OnDestroy {
     }
 
     public async restoreSession(session) {
-        return this.openInNewWindow(session.tabs);
+        return this.openTabsInNewWindow(session.tabs);
     }
 
     public async deleteSession(session) {
@@ -379,7 +379,11 @@ export class BrowserService implements OnInit, OnDestroy {
         }
     }
 
-    public async openInNewWindow(tabs = this.targetTabs) {
+    public async openUrlInNewWindow(url){
+        return this.openNewMaxmizedWindow(url);
+    }
+
+    public async openTabsInNewWindow(tabs = this.targetTabs) {
         if (tabs) {
             return new Promise((res, rej) => {
                 this.openNewMaxmizedWindow().then(window => {
@@ -544,9 +548,9 @@ export class BrowserService implements OnInit, OnDestroy {
         });
     }
 
-    protected openNewMaxmizedWindow() {
+    protected openNewMaxmizedWindow(url=GlobalConst.aboutblank) {
         return new Promise((res, rej) => {
-            chrome.windows.create({ state: WindowStates.maximized }, window => {
+            chrome.windows.create({ state: WindowStates.maximized, url }, window => {
                 if (chrome.runtime.lastError) {
                     rej(chrome.runtime.lastError);
                 } else {

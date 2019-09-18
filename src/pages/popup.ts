@@ -9,6 +9,7 @@ import { FilterComponent } from "../components/filterComponent";
 import { TabComponent } from "../components/tabComponent";
 import { SessionListComponent } from "../components/sessionListComponent";
 import { InputSessionNameDialogComponent } from "../dialogs/saveSessionDialog";
+import { DonateDialogComponent } from "../dialogs/donateDialog";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -16,19 +17,21 @@ import "bootstrap/dist/css/bootstrap.min.css";
     imports: [BrowserModule, FormsModule, NgbModule],
     providers: [],
     declarations: [
-        TabListComponent,
-        ToolbarComponent,
+        DonateDialogComponent,
         FilterComponent,
         InputSessionNameDialogComponent,
+        SessionListComponent,
+        TabListComponent,
+        ToolbarComponent,
         TabComponent,
-        SessionListComponent
     ],
     exports: [],
     bootstrap: [
+        FilterComponent,
         TabListComponent,
         ToolbarComponent,
-        FilterComponent
-    ]
+    ],
+    entryComponents:[]
 })
 export class PopupModule {}
 

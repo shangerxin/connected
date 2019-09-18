@@ -1,10 +1,65 @@
-<div>
-	<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-		<input type="hidden" name="cmd" value="_donations" />
-		<input type="hidden" name="business" value="SDPLY5RM6H2HW" />
-		<input type="hidden" name="currency_code" value="USD" />
-		<input type="hidden" name="amount" value="5" />
-		<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
-		<img alt="" border="0" src="https://www.paypal.com/en_C2/i/scr/pixel.gif" width="1" height="1" />
-	</form>
-</div>
+<ng-template #content let-modal>
+	<div class="modal-header">
+			<h4 class="modal-title" id="modal-basic-title">Donate</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Paypal</th>
+						<th scope="col">Alipay</th>
+						<th scope="col">WeChat</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let amount of amounts; index as i">
+						<td class="align-middle">
+							<button class="btn btn-link"
+								(click)="onClickPaypal(i, qrcontent)">
+								{{amount}}<img src="assets/images/dollar32.png" />
+							</button>
+						</td>
+						<td class="align-middle">
+							<button class="btn btn-link"
+								(click)="onClickAlipay(i, qrcontent)">
+								{{amount}}<img src="assets/images/rmb32.png" />
+							</button>
+						</td>
+						<td class="align-middle">
+							<button class="btn btn-link"
+								(click)="onClickWechat(i, qrcontent)">
+								{{amount}}<img src="assets/images/rmb32.png" />
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-outline-secondary" (click)="modal.close()">Save</button>
+		</div>
+</ng-template>
+
+<ng-template #qrcontent let-qrmodal>
+	<div class="modal-header">
+			<button
+				type="button"
+				class="close"
+				aria-label="Close"
+				(click)="qrmodal.dismiss('Cross click')"
+			>
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+			<img class="w-100" src="assets/images/{{ amount }}rmb-{{ vendor }}.png"/>
+		</div>
+</ng-template>
+
+<button class="btn btn-outline-secondary" placement="bottom" (click)="open(content, 'autofocus')" ngbTooltip="Buy me a coffee.">
+	<img class="button-icon" src="assets/images/coffee32.png"/>
+</button>
+

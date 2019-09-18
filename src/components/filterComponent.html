@@ -6,7 +6,7 @@
 			class="form-control"
 			[(ngModel)]="filter"
 			placeholder="{{filterPlaceholder}}"
-			(keyup)=onKey(filterElem.value)/>
+			(keyup)="onKey(filterElem.value, $event)"/>
 	<span class="input-group-append" style="margin-left: -20px; margin-right:15px">
 		<button class="close btn-outline-secondary" (click)="onClickResetFilter()" type="button" style="z-index: 3">
 			<span aria-hidden="true">&times;</span>

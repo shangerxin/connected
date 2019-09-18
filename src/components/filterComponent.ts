@@ -1,8 +1,8 @@
 import { OnInit, Component } from "@angular/core";
 import { BrowserService } from "../services/browserService";
 import { FilterService } from "../services/filterService";
-import { from, Observable, Subscriber } from "rxjs";
-import {debounceTime, distinctUntilChanged, switchMap} from "rxjs/operators";
+import { KeyCode, CommandTypes } from "../environments/globalConstTypes";
+import { CommandService } from "../services/commandService";
 
 @Component({
     selector: "ng-filter",
@@ -16,14 +16,23 @@ export class FilterComponent implements OnInit {
 
     constructor(
         private browserService: BrowserService,
-        private filterService: FilterService
+        private filterService: FilterService,
+        private commandService: CommandService
     ) {}
     ngOnInit(): void {
     }
 
-    public onKey(value: string) {
-		if(value){
-            this.filterService.search(this.filter);
+    public async onKey(value: string, event) {
+        if(event.keyCode && event.keyCode === KeyCode.enter && this.filter){
+            this.commandService.commandSubject.next({
+                type: CommandTypes.selectAllTabs,
+                args: {}
+            });
+            return;
+        }
+
+        if(value){
+            await this.filterService.search(this.filter);
 		}
 		else{
 			this.filterService.reset();

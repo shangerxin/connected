@@ -10,11 +10,22 @@ export const GlobalConst = {
     failure: -1,
     maxWindowTitleLength: 50,
     maxRecordStatisticCount: 2,
+    aboutblank: "about:blank"
+};
+
+export const DonateVendors = {
+    paypal: "paypal",
+    alipay: "alipay",
+    wechat: "wechat"
+};
+
+export const KeyCode = {
+    enter: 13
 };
 
 export const DBBrowserKeys = {
     previousClosedTabsInfo: "previousClosedTabsInfo",
-    commandStatisticInfo:"commandStatisticInfo",
+    commandStatisticInfo: "commandStatisticInfo"
 };
 
 export const Subjects = {
@@ -29,26 +40,27 @@ export const Subjects = {
 
 export const CommandTypes = {
     closeTabs: "closeTabs",
-    closeWindow:"closeWindow",
-    clearFilter:"clearFilter",
-    deleteSession:"deleteSession",
+    closeWindow: "closeWindow",
+    clearFilter: "clearFilter",
+    deleteSession: "deleteSession",
     donate: "donate",
     downloadSessionAsJSON: "downloadSessionAsJSON",
-    focusTab:"focusTab",
-    focusWindow:"focusWindow",
+    focusTab: "focusTab",
+    focusWindow: "focusWindow",
     moveToNewWindow: "moveToNewWindow",
     multedAllTabs: "muteAllTabs",
-    importSession:"importSession",
+    importSession: "importSession",
     openNewInWindow: "openNewInWindow",
     options: "options",
     refreshTabs: "refreshTabs",
-    refreshWindow:"refreshWindow",
+    refreshWindow: "refreshWindow",
     refreshAllTabs: "refreshAllTabs",
-    restoreSession:"restoreSession",
-    saveSession:"saveSession",
+    restoreSession: "restoreSession",
+    saveSession: "saveSession",
     togglePinTabs: "togglePinTabs",
     toggleSessionList: "toggleSessionList",
-    undoCloseTabs: "undoCloseTabs",
+    reopenClosedTabs: "reopenClosedTabs",
+    selectAllTabs: "selectAllTabs"
 };
 
 export const WindowStates = {
@@ -66,4 +78,3 @@ export const WindowType = {
     devtools: "devtools",
     allTypes: ["normal", "popup", "panel", "app", "devtools"]
 };
-

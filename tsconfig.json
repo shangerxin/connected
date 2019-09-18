@@ -6,14 +6,18 @@
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
         "outDir": "./dist/",
-        "sourceMap": true,
+        "sourceMap": false,
 		"noImplicitAny": false,
 		"removeComments": true,
-        "module": "commonjs",
+		"module": "CommonJS",
 		"target": "es6",
 		"typeRoots": [
 			"node_modules/@types",
 			"node_modules/@*"
+		],
+		"lib":[
+			"es2018",
+			"dom"
 		]
     },
     "include": [
@@ -22,5 +26,5 @@
 	"exclude": [
         "node_modules",
         "**/*.spec.ts"
-	],
+	]
 }

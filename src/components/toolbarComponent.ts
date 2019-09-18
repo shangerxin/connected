@@ -19,13 +19,6 @@ export class ToolbarComponent implements OnInit {
     ) {}
     ngOnInit(): void {}
 
-    public async onClickDonate() {
-        this.commandService.commandSubject.next({
-            type: CommandTypes.donate,
-            args: {}
-        });
-    }
-
     public async onClickTogglePinTabs() {
         this.commandService.commandSubject.next({
             type: CommandTypes.togglePinTabs,
@@ -42,10 +35,10 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
-    public async onClickUndoCloseTabs() {
-        this.browserService.undoCloseTabs();
+    public async onClickReopenTabs() {
+        this.browserService.reopenClosedTabs();
         this.commandService.commandSubject.next({
-            type: CommandTypes.undoCloseTabs,
+            type: CommandTypes.reopenClosedTabs,
             args: {}
         });
     }
@@ -82,7 +75,7 @@ export class ToolbarComponent implements OnInit {
     }
 
     public async onClickOpenInNewWindow() {
-        this.browserService.openInNewWindow();
+        this.browserService.openTabsInNewWindow();
         this.commandService.commandSubject.next({
             type: CommandTypes.openNewInWindow,
             args: {}
@@ -108,8 +101,8 @@ export class ToolbarComponent implements OnInit {
 
     public async onClickImportSession(uploadSessionFile){
         if(!uploadSessionFile.changedListener){
-            uploadSessionFile.changedListener = (evt)=>{
-                let files = evt.target.files;
+            uploadSessionFile.changedListener = (event)=>{
+                let files = event.target.files;
                 _.forEach(files, file=>{
                     let reader = new FileReader();
                     reader.onload = ()=>{

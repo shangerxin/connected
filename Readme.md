@@ -30,16 +30,16 @@ $ npm install --save-dev @types/lodash
 -   add right click + move to new window + unselect all + close
 -   add session create time and last access time and modify the table sequence
 -   [x]add export and import sessions
--   []add help document
--   []filter hit enter twice to select all filtered tabs
+-   add help document
+-   [x]filter hit enter twice to select all filtered tabs
 -   add remove duplicate tabs, the trail '/' should be ignore
 -   merge refresh tabs with refresh all
--   []add donate buttons
--   []add extension description page in home page
+-   [x]add donate buttons
+-   add extension description page in home page
 -   write a simple article about browser extension
--   []optimize and minify packaged code
+-   optimize and minify packaged code
 -   add option page
 -   []publish extension
--   [x] added statistic logic 
+-   [x] added statistic logic
 -   add l18n support
 -   add test cases
