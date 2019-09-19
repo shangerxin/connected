@@ -46,3 +46,5 @@ $ npm install --save-dev @types/lodash
 -   improve filter with h1 content
 -   Remove url trail segment when compare duplicate tabs
 -   Add version component and get the version number from manifest
+-   fix Firefox open session will not correctly open all the tabs
+-   Add logs capability for all the public functions 
