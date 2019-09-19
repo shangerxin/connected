@@ -8,7 +8,7 @@ var CopyPlugin = require('copy-webpack-plugin');
 
 let config = {
 	target:'web',
-	mode: 'development',
+	mode: 'production',
 	entry: () => {
 		entries = {
 			background: './src/background.ts',
@@ -89,7 +89,6 @@ let config = {
 			}
 		])
 	],
-	mode: 'development',
 	optimization: {
 		namedChunks: true,
 		minimize: false,

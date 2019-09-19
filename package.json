@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "test": "jest",
-    "build": "webpack&ng build"
+    "build": "webpack&ng build --prod",
+    "build-dev": "webpack&ng build"
   },
   "keywords": [
     "workspace",

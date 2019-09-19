@@ -43,3 +43,6 @@ $ npm install --save-dev @types/lodash
 -   [x] added statistic logic
 -   add l18n support
 -   add test cases
+-   improve filter with h1 content
+-   Remove url trail segment when compare duplicate tabs
+-   Add version component and get the version number from manifest

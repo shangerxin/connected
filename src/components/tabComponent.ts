@@ -76,7 +76,7 @@ export class TabComponent implements OnInit, OnDestroy {
     @Input()
     tabModel;
 
-    public get tab(): Observable<any> {
+    public get tab(){
         return this.tabModel;
     }
 
