@@ -47,4 +47,21 @@ $ npm install --save-dev @types/lodash
 -   Remove url trail segment when compare duplicate tabs
 -   Add version component and get the version number from manifest
 -   fix Firefox open session will not correctly open all the tabs
--   Add logs capability for all the public functions 
+-   Add logs capability for all the public functions
+-   Save temp working sessions
+-   Add session to support multiple windows
+-   Handle Firefox compatibility issue
+
+
+# Naming convension
+- source
+sourceName.browser.[ts|js]
+- test
+sourceName.browser.spec.[ts|js]
+- css
+cssName.browser.css
+- html
+htmlName.browser.html
+- resource
+resource-name.browser.ext
+- all the file without browser is the base file
