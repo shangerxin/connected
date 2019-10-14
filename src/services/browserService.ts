@@ -1,5 +1,8 @@
 import { Injectable, OnDestroy, OnInit } from "@angular/core";
+
 import * as _ from "lodash";
+import { Subject, Observable } from "rxjs";
+
 import "../extends/extendPromise";
 import {
     DBBrowserKeys,
@@ -9,7 +12,6 @@ import {
     WindowType
 } from "../environments/globalConstTypes";
 import { PersistentService } from "../services/persistentService";
-import { Subject, Observable } from "rxjs";
 
 @Injectable({
     providedIn: "root"

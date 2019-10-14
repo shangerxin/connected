@@ -1,7 +1,8 @@
-import * as _ from "lodash";
-
 import { Injectable } from "@angular/core";
+
+import * as _ from "lodash";
 import { Subject, Observable } from "rxjs";
+
 import { BrowserService } from "./browserService";
 import { GlobalConst } from "../environments/globalConstTypes";
 

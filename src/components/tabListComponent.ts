@@ -1,14 +1,15 @@
-import * as _ from "lodash";
-import "../extends/extendArray";
-import { OnInit, Component, OnDestroy, Input } from "@angular/core";
+import { OnInit, Component, OnDestroy } from "@angular/core";
 
+import * as _ from "lodash";
+import { Observable, of, Subscription } from "rxjs";
+
+import "../extends/extendArray";
 import { BrowserService } from "../services/browserService";
 import {
     GlobalConst,
     Subjects,
     CommandTypes
 } from "../environments/globalConstTypes";
-import { Observable, of, Subscription, from } from "rxjs";
 import { FilterService } from "../services/filterService";
 import { TabModel } from "../models/tabModel";
 import { WindowModel } from "../models/windowModel";

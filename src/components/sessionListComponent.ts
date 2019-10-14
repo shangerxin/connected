@@ -1,10 +1,12 @@
+import { OnInit, Component, OnDestroy } from "@angular/core";
+
 import * as _ from "lodash";
-import { OnInit, Component, Input, OnDestroy } from "@angular/core";
+import { Observable } from "rxjs";
+
 import { BrowserService } from "../services/browserService";
 import { FilterService } from "../services/filterService";
 import { SessionModel } from "../models/sessionModel";
 import { GlobalConst, CommandTypes } from "../environments/globalConstTypes";
-import { Observable } from "rxjs";
 import {generateTextContentUrl} from "../utils";
 import "../extends/extendArray";
 import { CommandService } from "../services/commandService";

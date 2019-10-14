@@ -1,7 +1,8 @@
+import { Injectable } from "@angular/core";
+
 import * as _ from "lodash";
 import * as localforage from "localforage";
 
-import { Injectable } from "@angular/core";
 import "../extends/extendPromise";
 
 @Injectable({

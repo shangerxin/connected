@@ -1,5 +1,3 @@
-import * as _ from "lodash";
-import "../extends/extendArray";
 import {
     OnInit,
     Component,
@@ -9,16 +7,17 @@ import {
     EventEmitter
 } from "@angular/core";
 
+import * as _ from "lodash";
+import { Subscription } from "rxjs";
+
+import "../extends/extendArray";
 import { BrowserService } from "../services/browserService";
 import {
-    GlobalConst,
     Subjects,
     CommandTypes
 } from "../environments/globalConstTypes";
-import { Observable, Subscription } from "rxjs";
 import { TabModel } from "../models/tabModel";
 import { CommandService } from "../services/commandService";
-import { tsThisType } from "@babel/types";
 
 @Component({
     selector: "ng-tab",

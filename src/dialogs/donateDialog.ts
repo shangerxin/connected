@@ -1,7 +1,7 @@
-import { Component, Output, EventEmitter } from "@angular/core";
+import { Component } from "@angular/core";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 
 import { DonateVendors, CommandTypes } from "../environments/globalConstTypes";
-import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { BrowserService } from "../services/browserService";
 import { CommandService } from "../services/commandService";
 

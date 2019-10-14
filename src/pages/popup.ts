@@ -1,7 +1,8 @@
 import { NgModule } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import { BrowserModule } from "@angular/platform-browser";
+import { FormsModule } from "@angular/forms";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
+import { CommonModule } from '@angular/common';
 
 import { TabListComponent } from "../components/tabListComponent";
 import { ToolbarComponent } from "../components/toolbarComponent";
@@ -12,10 +13,31 @@ import { InputSessionNameDialogComponent } from "../dialogs/saveSessionDialog";
 import { DonateDialogComponent } from "../dialogs/donateDialog";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import { BrowserService } from "../services/browserService";
+import { CommandService } from "../services/commandService";
+import { CommunicatorService } from "../services/communicatorService";
+import { FilterService } from "../services/filterService";
+import { HistoryService } from "../services/historyService";
+import { LogService } from "../services/logService";
+import { PersistentService } from "../services/persistentService";
+import { StatisticService } from "../services/statisticService";
+import { ToastService } from "../services/toastService";
 
 @NgModule({
-    imports: [BrowserModule, FormsModule, NgbModule],
-    providers: [],
+    imports: [BrowserModule, FormsModule, CommonModule, NgbModule],
+    exports: [],
+    entryComponents: [TabComponent, SessionListComponent, InputSessionNameDialogComponent],
+    providers: [
+        BrowserService,
+        CommandService,
+        CommunicatorService,
+        FilterService,
+        HistoryService,
+        LogService,
+        PersistentService,
+        StatisticService,
+        ToastService
+    ],
     declarations: [
         DonateDialogComponent,
         FilterComponent,
@@ -23,15 +45,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
         SessionListComponent,
         TabListComponent,
         ToolbarComponent,
-        TabComponent,
+        TabComponent
     ],
-    exports: [],
-    bootstrap: [
-        FilterComponent,
-        TabListComponent,
-        ToolbarComponent,
-    ],
-    entryComponents:[]
+    bootstrap: [FilterComponent, TabListComponent, ToolbarComponent]
 })
 export class PopupModule {}
-

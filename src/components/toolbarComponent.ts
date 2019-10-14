@@ -1,10 +1,11 @@
-import { OnInit, Component, Output, EventEmitter } from "@angular/core";
+import { OnInit, Component } from "@angular/core";
+
+import * as _ from "lodash";
 
 import { BrowserService } from "../services/browserService";
 import { CommandService } from "../services/commandService";
-import { GlobalConst, CommandTypes } from "../environments/globalConstTypes";
-import * as _ from "lodash";
-import { PersistentService } from "src/services/persistentService";
+import { CommandTypes } from "../environments/globalConstTypes";
+import { PersistentService } from "../services/persistentService";
 
 @Component({
     selector: "ng-toolbar",
