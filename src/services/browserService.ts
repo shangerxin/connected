@@ -12,6 +12,7 @@ import {
     WindowType
 } from "../environments/globalConstTypes";
 import { PersistentService } from "../services/persistentService";
+import { EnvironmentService } from "./environmentService";
 
 @Injectable({
     providedIn: "root"
@@ -32,11 +33,13 @@ export class BrowserService implements OnInit, OnDestroy {
     private _browserListeners: Map<string, Function>;
 
     private _previousClosedTabsInfo: any;
-    constructor(private persistentService: PersistentService) {
+    protected _browserAPI: any;
+    constructor(private persistentService: PersistentService,
+                private environmentService: EnvironmentService) {
         persistentService
             .get(DBBrowserKeys.previousClosedTabsInfo)
             .then(v => (this._previousClosedTabsInfo = v));
-
+        this._browserAPI = environmentService.browserAPI;
         this.sessionChangedSubject = new Subject<any>();
         this.sessionChangedObservable = this.sessionChangedSubject.asObservable();
         this.tabChangedSubject = new Subject<any>();
@@ -68,18 +71,18 @@ export class BrowserService implements OnInit, OnDestroy {
     }
 
     getURL(relativePath) {
-        return chrome.runtime.getURL(relativePath);
+        return this._browserAPI.runtime.getURL(relativePath);
     }
 
     //Tab relative
     public async getAllTabs(): Promise<Array<any>> {
         let allTabs = [];
         return new Promise(res => {
-            chrome.windows.getAll(
+            this._browserAPI.windows.getAll(
                 { windowTypes: WindowType.allTypes, populate: true },
                 windows => {
                     Promise.sequenceHandleAll(windows, (window, callback) => {
-                        chrome.tabs.query({ windowId: window.id }, tabs => {
+                        this._browserAPI.tabs.query({ windowId: window.id }, tabs => {
                             _.forEach(tabs, tab => allTabs.push(tab));
                             callback();
                         });
@@ -91,7 +94,7 @@ export class BrowserService implements OnInit, OnDestroy {
 
     public async getCurrentTab() {
         return new Promise(res => {
-            chrome.tabs.getCurrent(tab => {
+            this._browserAPI.tabs.getCurrent(tab => {
                 res(tab);
             });
         });
@@ -100,7 +103,7 @@ export class BrowserService implements OnInit, OnDestroy {
     public async createTab(window) {
         if (window) {
             return new Promise((res, rej) => {
-                chrome.tabs.create(
+                this._browserAPI.tabs.create(
                     { windowId: window.id, active: true },
                     tab => {
                         res(tab);
@@ -109,7 +112,7 @@ export class BrowserService implements OnInit, OnDestroy {
             });
         } else {
             return this.getCurrentWindow().then(window => {
-                chrome.tabs.create(
+                this._browserAPI.tabs.create(
                     { windowId: (<any>window).id, active: true },
                     tab => {
                         return tab;
@@ -124,7 +127,7 @@ export class BrowserService implements OnInit, OnDestroy {
             return Promise.sequenceHandleAll(
                 _.map(tabs, tab => tab.id),
                 (tabId, callback, result) => {
-                    chrome.tabs.get(tabId, tab => {
+                    this._browserAPI.tabs.get(tabId, tab => {
                         callback(tab.pinned === true && result === true);
                     });
                 },
@@ -132,7 +135,7 @@ export class BrowserService implements OnInit, OnDestroy {
             ).then(isAllPinned => {
                 _.map(tabs, tab => {
                     return new Promise(res => {
-                        chrome.tabs.update(
+                        this._browserAPI.tabs.update(
                             tab.id,
                             { pinned: !isAllPinned },
                             () => {
@@ -153,7 +156,7 @@ export class BrowserService implements OnInit, OnDestroy {
             return Promise.all(
                 _.map(tabs, tab => {
                     return new Promise(res => {
-                        chrome.tabs.remove(tab.id, () => {
+                        this._browserAPI.tabs.remove(tab.id, () => {
                             res();
                         });
                     });
@@ -167,7 +170,7 @@ export class BrowserService implements OnInit, OnDestroy {
             return Promise.all(
                 _.map(tabs, tab => {
                     return new Promise(res => {
-                        chrome.tabs.reload(
+                        this._browserAPI.tabs.reload(
                             tab.id,
                             { bypassCache: true },
                             () => {
@@ -184,7 +187,7 @@ export class BrowserService implements OnInit, OnDestroy {
         return this.getAllTabs().then(tabs => {
             return new Promise(res => {
                 _.forEach(<any>tabs, tab => {
-                    chrome.tabs.reload(tab.id, { bypassCache: true }, () => {
+                    this._browserAPI.tabs.reload(tab.id, { bypassCache: true }, () => {
                         res();
                     });
                 });
@@ -201,7 +204,7 @@ export class BrowserService implements OnInit, OnDestroy {
                     true
                 );
                 _.forEach(<any>tabs, tab => {
-                    chrome.tabs.update(tab.id, { muted: !isAllMuted }, () => {
+                    this._browserAPI.tabs.update(tab.id, { muted: !isAllMuted }, () => {
                         res();
                     });
                 });
@@ -217,8 +220,8 @@ export class BrowserService implements OnInit, OnDestroy {
                 this.targetTabs[0]);
         if (tab) {
             return new Promise(res => {
-                chrome.tabs.update(tab.id, { active: true }, () => {
-                    chrome.windows.get(tab.windowId, async window => {
+                this._browserAPI.tabs.update(tab.id, { active: true }, () => {
+                    this._browserAPI.windows.get(tab.windowId, async window => {
                         await this.focusWindow(window);
                         res();
                     });
@@ -242,7 +245,7 @@ export class BrowserService implements OnInit, OnDestroy {
                         _.map(allWindows, window => window.id)
                     );
                     if (windowIds.has(info.windowId)) {
-                        chrome.tabs.create(
+                        this._browserAPI.tabs.create(
                             { url: info.url, windowId: info.windowId },
                             () => {
                                 callback();
@@ -252,7 +255,7 @@ export class BrowserService implements OnInit, OnDestroy {
                         if (!windowInfo.window) {
                             this.openNewMaxmizedWindow().then(window => {
                                 windowInfo.window = window;
-                                chrome.tabs.update(
+                                this._browserAPI.tabs.update(
                                     (<any>window).tabs[0].id,
                                     { url: info.url },
                                     () => {
@@ -261,7 +264,7 @@ export class BrowserService implements OnInit, OnDestroy {
                                 );
                             });
                         } else {
-                            chrome.tabs.create(
+                            this._browserAPI.tabs.create(
                                 {
                                     url: info.url,
                                     windowId: windowInfo.window.id
@@ -280,7 +283,7 @@ export class BrowserService implements OnInit, OnDestroy {
     //Window realtive
     public async getWindows(): Promise<Array<any>> {
         return new Promise(res => {
-            chrome.windows.getAll(
+            this._browserAPI.windows.getAll(
                 {
                     populate: true,
                     windowTypes: WindowType.allTypes
@@ -292,7 +295,7 @@ export class BrowserService implements OnInit, OnDestroy {
 
     public async getCurrentWindow() {
         return new Promise(res => {
-            chrome.windows.getCurrent(window => {
+            this._browserAPI.windows.getCurrent(window => {
                 res(window);
             });
         });
@@ -342,7 +345,7 @@ export class BrowserService implements OnInit, OnDestroy {
                                 windowId: tab.windowId
                             });
                         });
-                        chrome.windows.remove(window.id, () => {
+                        this._browserAPI.windows.remove(window.id, () => {
                             this.targetWindows = [];
                             res();
                         });
@@ -362,7 +365,7 @@ export class BrowserService implements OnInit, OnDestroy {
                 this.targetWindows[0]);
         if (window) {
             return new Promise(res => {
-                chrome.windows.update(window.id, { focused: true }, () => {
+                this._browserAPI.windows.update(window.id, { focused: true }, () => {
                     res();
                 });
             });
@@ -392,7 +395,7 @@ export class BrowserService implements OnInit, OnDestroy {
                     let isFirst = true;
                     Promise.sequenceHandleAll(tabs, async (tab, callback) => {
                         if (isFirst) {
-                            chrome.tabs.update(
+                            this._browserAPI.tabs.update(
                                 (<any>window).tabs[0].id,
                                 { url: tab.url, pinned: !!tab.pinned },
                                 () => {
@@ -401,7 +404,7 @@ export class BrowserService implements OnInit, OnDestroy {
                                 }
                             );
                         } else {
-                            chrome.tabs.create(
+                            this._browserAPI.tabs.create(
                                 {
                                     url: tab.url,
                                     windowId: (<any>window).id,
@@ -428,13 +431,13 @@ export class BrowserService implements OnInit, OnDestroy {
                     Promise.sequenceHandleAll(tabs, (tab, callback) => {
                         if (isFirst) {
                             isFirst = false;
-                            chrome.tabs.update(
+                            this._browserAPI.tabs.update(
                                 (<any>window).tabs[0].id,
                                 { url: tab.url },
                                 callback
                             );
                         } else {
-                            chrome.tabs.create(
+                            this._browserAPI.tabs.create(
                                 { url: tab.url, windowId: (<any>window).id },
                                 callback
                             );
@@ -447,7 +450,7 @@ export class BrowserService implements OnInit, OnDestroy {
 
     public async download(url, filename) {
         return new Promise(res => {
-            chrome.downloads.download(
+            this._browserAPI.downloads.download(
                 {
                     url,
                     filename,
@@ -471,7 +474,7 @@ export class BrowserService implements OnInit, OnDestroy {
         this._browserListeners.set(
             Subjects.tabs_onUpdated,
             async (tabId, changeInfo) => {
-                chrome.tabs.get(tabId, tab => {
+                this._browserAPI.tabs.get(tabId, tab => {
                     if (tab) {
                         _.assign(tab, changeInfo);
                     }
@@ -498,7 +501,7 @@ export class BrowserService implements OnInit, OnDestroy {
             });
         });
         this._browserListeners.set(Subjects.tabs_onActivated, activeInfo => {
-            chrome.tabs.get(activeInfo.tabId, tab => {
+            this._browserAPI.tabs.get(activeInfo.tabId, tab => {
                 tab.active = true;
                 this.tabChangedSubject.next({
                     type: Subjects.tabs_onActivated,
@@ -552,9 +555,9 @@ export class BrowserService implements OnInit, OnDestroy {
 
     protected openNewMaxmizedWindow(url=GlobalConst.aboutblank) {
         return new Promise((res, rej) => {
-            chrome.windows.create({ state: WindowStates.maximized, url }, window => {
-                if (chrome.runtime.lastError) {
-                    rej(chrome.runtime.lastError);
+            this._browserAPI.windows.create({ state: WindowStates.maximized, url }, window => {
+                if (this._browserAPI.runtime.lastError) {
+                    rej(this._browserAPI.runtime.lastError);
                 } else {
                     res(window);
                 }

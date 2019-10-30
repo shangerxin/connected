@@ -5,7 +5,6 @@ import * as _ from "lodash";
 import { BrowserService } from "../services/browserService";
 import { CommandService } from "../services/commandService";
 import { CommandTypes } from "../environments/globalConstTypes";
-import { PersistentService } from "../services/persistentService";
 
 @Component({
     selector: "ng-toolbar",
