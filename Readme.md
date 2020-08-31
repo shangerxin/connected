@@ -3,7 +3,29 @@
 This project Connected is main to accelerate the personal daily productivity.
 It included personal workspace management and tab management etc.
 
+# Support browsers
+
+-   Chrome
+    https://chrome.google.com/webstore/detail/connected/bcdjfmdcglkoffcckhlpghiloocpehnc
+
 # Features
+
+1. Close selected tabs
+2. Close window
+3. Double click tab icon to focus the tab
+4. Export a session as a JSON file
+5. Import a session file
+6. Open selected tabs in new window
+7. Move selected tabs in new window
+8. Reopen closed tabs, currently limitted to the tabs closed by the extension
+9. Refresh the tabs of a window
+10. Refresh all/selected tabs
+11. Restore the session from the session list view
+12. Save a window as a session
+13. Search tab with title and url
+14. Search session with session name
+15. Toggle mute all tabs
+16. Toggle pinned tabs
 
 # Setup
 
@@ -52,19 +74,19 @@ $ npm install --save-dev @types/lodash
 -   Add session to support multiple windows
 -   Handle Firefox compatibility issue
 -   []fix filter is not take effect when switch between session view and tabs list
--   []Status after restore from a crash session such as computer power down and 
-the browser process is terminated
-
+-   []Status after restore from a crash session such as computer power down and
+    the browser process is terminated
 
 # Naming convension
-- source
-sourceName.browser.[ts|js]
-- test
-sourceName.browser.spec.[ts|js]
-- css
-cssName.browser.css
-- html
-htmlName.browser.html
-- resource
-resource-name.browser.ext
-- all the file without browser is the base file
+
+-   source
+    sourceName.browser.[ts|js]
+-   test
+    sourceName.browser.spec.[ts|js]
+-   css
+    cssName.browser.css
+-   html
+    htmlName.browser.html
+-   resource
+    resource-name.browser.ext
+-   all the file without browser is the base file
