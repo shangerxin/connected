@@ -51,6 +51,9 @@ $ npm install --save-dev @types/lodash
 -   Save temp working sessions
 -   Add session to support multiple windows
 -   Handle Firefox compatibility issue
+-   []fix filter is not take effect when switch between session view and tabs list
+-   []Status after restore from a crash session such as computer power down and 
+the browser process is terminated
 
 
 # Naming convension
