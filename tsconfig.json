@@ -9,7 +9,7 @@
         "sourceMap": false,
         "noImplicitAny": false,
         "removeComments": true,
-        "module": "CommonJS",
+        "module": "esnext",
         "target": "ES2019",
         "typeRoots": [
             "node_modules/@types",
@@ -20,11 +20,11 @@
             "dom"
         ]
     },
+  "files": [
+    "src/background.ts",
+    "src/polyfills.ts"
+  ],
     "include": [
         "./src/**/*"
-    ],
-    "exclude": [
-        "node_modules",
-        "**/*.spec.ts"
     ]
 }
