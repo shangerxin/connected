@@ -1,0 +1,30 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "baseUrl": "./",
+        "allowJs": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "outDir": "./dist/",
+        "sourceMap": false,
+        "noImplicitAny": false,
+        "removeComments": true,
+        "module": "es2020",
+        "target": "ES2019",
+        "typeRoots": [
+            "node_modules/@types",
+            "node_modules/@*"
+        ],
+        "lib": [
+            "ES2019",
+            "dom"
+        ]
+    },
+  "files": [
+    "src/background.ts",
+    "src/polyfills.ts"
+  ],
+    "include": [
+        "./src/**/*"
+    ]
+}

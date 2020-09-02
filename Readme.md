@@ -3,6 +3,9 @@
 This project Connected is main to accelerate the personal daily productivity.
 It included personal workspace management and tab management etc.
 
+Git repository: https://github.com/shangerxin/connected
+Author home page: http://www.shangerxin.com/
+
 # Support browsers
 
 -   Chrome
@@ -17,7 +20,7 @@ It included personal workspace management and tab management etc.
 5. Import a session file
 6. Open selected tabs in new window
 7. Move selected tabs in new window
-8. Reopen closed tabs, currently limitted to the tabs closed by the extension
+8. Reopen closed tabs, currently limited to the tabs closed by the extension
 9. Refresh the tabs of a window
 10. Refresh all/selected tabs
 11. Restore the session from the session list view
@@ -29,7 +32,7 @@ It included personal workspace management and tab management etc.
 
 # Setup
 
--   prequirement
+-   requirements
     nodejs
     chrome
 
@@ -77,7 +80,7 @@ $ npm install --save-dev @types/lodash
 -   []Status after restore from a crash session such as computer power down and
     the browser process is terminated
 
-# Naming convension
+# Naming convention
 
 -   source
     sourceName.browser.[ts|js]

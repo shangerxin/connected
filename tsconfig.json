@@ -1,30 +1,17 @@
+/*
+  This is a "Solution Style" tsconfig.json file, and is used by editors and TypeScript’s language server to improve development experience.
+  It is not intended to be used to perform a compilation.
+
+  To learn more about this file see: https://angular.io/config/solution-tsconfig.
+*/
 {
-    "compileOnSave": false,
-    "compilerOptions": {
-        "baseUrl": "./",
-        "allowJs": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "outDir": "./dist/",
-        "sourceMap": false,
-        "noImplicitAny": false,
-        "removeComments": true,
-        "module": "esnext",
-        "target": "ES2019",
-        "typeRoots": [
-            "node_modules/@types",
-            "node_modules/@*"
-        ],
-        "lib": [
-            "ES2019",
-            "dom"
-        ]
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.json"
     },
-  "files": [
-    "src/background.ts",
-    "src/polyfills.ts"
-  ],
-    "include": [
-        "./src/**/*"
-    ]
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }
