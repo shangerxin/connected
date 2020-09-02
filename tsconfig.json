@@ -1,30 +1,30 @@
 {
-	"compileOnSave": false,
+    "compileOnSave": false,
     "compilerOptions": {
-		"baseUrl": "./",
-		"allowJs": true,
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
+        "baseUrl": "./",
+        "allowJs": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
         "outDir": "./dist/",
         "sourceMap": false,
-		"noImplicitAny": false,
-		"removeComments": true,
-		"module": "CommonJS",
-		"target": "es6",
-		"typeRoots": [
-			"node_modules/@types",
-			"node_modules/@*"
-		],
-		"lib":[
-			"es2018",
-			"dom"
-		]
+        "noImplicitAny": false,
+        "removeComments": true,
+        "module": "CommonJS",
+        "target": "ES2019",
+        "typeRoots": [
+            "node_modules/@types",
+            "node_modules/@*"
+        ],
+        "lib": [
+            "ES2019",
+            "dom"
+        ]
     },
     "include": [
         "./src/**/*"
-	],
-	"exclude": [
+    ],
+    "exclude": [
         "node_modules",
         "**/*.spec.ts"
-	]
+    ]
 }
