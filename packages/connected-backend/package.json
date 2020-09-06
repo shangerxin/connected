@@ -1,0 +1,18 @@
+{
+    "name": "connected-backend",
+    "version": "1.0.0",
+    "description": "The back end service of the Connected addon",
+    "main": "BackendIndex.ts",
+    "scripts": {
+        "test": "jest"
+    },
+    "keywords": [
+        "Connected",
+        "Backend"
+    ],
+    "author": "Edwin (Er-Xin)",
+    "license": "ISC",
+    "dependencies": {
+        "connected-core": "file: ../connected-core"
+    }
+}

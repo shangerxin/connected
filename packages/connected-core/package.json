@@ -1,0 +1,18 @@
+{
+    "name": "connected-core",
+    "version": "1.0.0",
+    "description": "The core package of the connected project. Contain data models common functions etc.",
+    "main": "index.ts",
+    "scripts": {
+        "test": "jest"
+    },
+    "keywords": [
+        "connected",
+        "core"
+    ],
+    "author": "Edwin (Er-Xin)",
+    "license": "ISC",
+    "devDependencies": {
+        "lodash": "^4.17.20"
+    }
+}
